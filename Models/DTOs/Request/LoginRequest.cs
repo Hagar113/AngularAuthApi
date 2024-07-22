@@ -11,5 +11,8 @@ namespace Models.DTOs.Request
         public int userId { get; set; }
         public string? email_phone { get; set; }
         public string? password { get; set; }
+        public string? languageCode { get; set; }
+
+
     }
 }

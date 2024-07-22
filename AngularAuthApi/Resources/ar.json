@@ -1,0 +1,18 @@
+{
+  "DataNotFound": "البيانات غير موجودة",
+  "UserNotFound": "المستخدم غير موجود",
+  "LoginSuccessful": "تسجيل الدخول بنجاح",
+  "ValidationFailed": "فشل التحقق",
+  "EmailOrPhoneExists": "البريد الإلكتروني أو رقم الهاتف تم استخدامه من قبل",
+  "RegistrationSuccessful": "تم التسجيل بنجاح",
+  "RoleNotExist": "الدور المحدد غير موجود",
+  "InvalidEmail": "عنوان البريد الإلكتروني غير صالح",
+  "InvalidPhoneNumber": "رقم الهاتف يجب أن يبدأ بـ 010 أو 011 أو 012 ويكون طوله 11 رقماً",
+  "InvalidAcademicYear": "السنة الدراسية يجب أن تكون بتنسيق 'YYYY' أو 'YYYY-YYYY'",
+  "AgeMismatch": "العمر لا يتطابق مع تاريخ الميلاد",
+  "InvalidStudentAge": "بالنسبة للطلاب، يجب أن يكون العمر بين 14 و 25",
+  "InvalidTeacherAge": "بالنسبة للمعلمين، يجب أن يكون العمر بين 25 و 60",
+  "RolesRetrieved": "تم استرجاع الأدوار بنجاح",
+  "ErrorOccurred": "حدث خطأ، يرجى المحاولة مرة أخرى لاحقاً",
+  "InvalidUserRole": "الدور أو المستخدم غير صحيح."
+}

@@ -1,0 +1,21 @@
+{
+  "DataNotFound": "Data not found",
+  "UserNotFound": "User not found",
+  "LoginSuccessful": "Login successful",
+  "ValidationFailed": "Validation failed",
+  "EmailOrPhoneExists": "Email or phone number has been used before",
+  
+  "RegistrationSuccessful": "Successfully registered",
+  "RoleNotExist": "The provided role does not exist",
+  "InvalidEmail": "Invalid email address",
+  "InvalidPhoneNumber": "Phone number must start with 010, 011, or 012 and be exactly 11 digits long",
+  "InvalidAcademicYear": "Academic year must be in the format 'YYYY' or 'YYYY-YYYY'",
+  "AgeMismatch": "Age does not match Date of Birth",
+  "InvalidStudentAge": "For students, age must be between 14 and 25",
+  "InvalidTeacherAge": "For teachers, age must be between 25 and 60",
+  "RolesRetrieved": "Roles retrieved successfully",
+  "ErrorOccurred": "An error occurred, please try again later",
+  "InvalidUserRole": "Invalid user or role."
+}
+
+

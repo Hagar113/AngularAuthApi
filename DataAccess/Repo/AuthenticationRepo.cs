@@ -1,7 +1,9 @@
 ﻿using DataAccess.IRepo;
+using Infrastructure.helpers;
 using Infrastructure.helpers.Helper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Models.DTOs.BaseRequest;
 using Models.DTOs.Request;
 using Models.DTOs.Response;
 using Models.models;
@@ -28,11 +30,13 @@ namespace DataAccess.Repo
 
 
 
-        public async Task<bool> UserRegister(RegisterRequest registerRequest)
+        public async Task<bool> UserRegister(BaseRequestHeader baseRequest)
         {
             try
             {
-                // Validate the register request object
+                RegisterRequest registerRequest = Deserialization.Deserialize<RegisterRequest>(baseRequest.data.ToString());
+
+                // Validate the RegisterRequest object directly
                 if (!CheckRequestedObj(registerRequest))
                 {
                     Console.WriteLine("Invalid registration request");
@@ -42,15 +46,12 @@ namespace DataAccess.Repo
                 Encryption encryption = new Encryption();
                 string encryptedPassword = encryption.Encrypt(registerRequest.password);
 
-                // Check if the role exists
                 var role = await _context.roles.FindAsync(registerRequest.RoleId);
                 if (role == null)
                 {
-                    // Role does not exist
                     return false;
                 }
 
-                // Create a new user
                 Users newUser = new Users
                 {
                     Username = registerRequest.userName,
@@ -66,7 +67,6 @@ namespace DataAccess.Repo
                 await _context.users.AddAsync(newUser);
                 await _context.SaveChangesAsync();
 
-                // Save the role data
                 switch (role.code)
                 {
                     case "STUDENT_CODE":
@@ -113,6 +113,22 @@ namespace DataAccess.Repo
 
 
 
+
+
+        public bool CheckRequestedObj(RegisterRequest registerRequest)
+        {
+            // Simplified validation logic
+            return !string.IsNullOrEmpty(registerRequest.userName) &&
+                   !string.IsNullOrEmpty(registerRequest.phone) &&
+                   !string.IsNullOrEmpty(registerRequest.email) &&
+                   !string.IsNullOrEmpty(registerRequest.firstName) &&
+                   registerRequest.age > 0 &&
+                   !string.IsNullOrEmpty(registerRequest.password) &&
+                   registerRequest.RoleId != 0;
+        }
+
+
+
         public async Task<List<RolesResponse>> GetAllRoles()
         {
             try
@@ -144,18 +160,18 @@ namespace DataAccess.Repo
 
 
 
-        public bool CheckRequestedObj(RegisterRequest registerRequest)
-        {
-            // Simplified validation logic
-            return !string.IsNullOrEmpty(registerRequest.userName) &&
-                   !string.IsNullOrEmpty(registerRequest.phone) &&
-                   !string.IsNullOrEmpty(registerRequest.email) &&
-                   !string.IsNullOrEmpty(registerRequest.firstName) &&
-                   registerRequest.age > 0 &&
+        //public bool CheckRequestedObj(RegisterRequest registerRequest)
+        //{
+        //    // Simplified validation logic
+        //    return !string.IsNullOrEmpty(registerRequest.userName) &&
+        //           !string.IsNullOrEmpty(registerRequest.phone) &&
+        //           !string.IsNullOrEmpty(registerRequest.email) &&
+        //           !string.IsNullOrEmpty(registerRequest.firstName) &&
+        //           registerRequest.age > 0 &&
                    
-                   !string.IsNullOrEmpty(registerRequest.password) &&
-                   registerRequest.RoleId != 0;
-        }
+        //           !string.IsNullOrEmpty(registerRequest.password) &&
+        //           registerRequest.RoleId != 0;
+        //}
 
         public async Task<bool> checkIfEmailOrPhoneOrUsernameExists(string _email, string _phone)
         {
@@ -179,10 +195,13 @@ namespace DataAccess.Repo
             return sb.ToString();
         }
 
-        public async Task<LoginResponse> Login(LoginRequest loginRequest)
+        public async Task<LoginResponse> Login(BaseRequestHeader baseRequest)
         {
             try
             {
+                // Deserialize the LoginRequest from the baseRequest data
+                LoginRequest loginRequest = Deserialization.Deserialize<LoginRequest>(baseRequest.data.ToString());
+
                 var user = await _context.users
                             .Include(u => u.Role) // Include Role details
                             .FirstOrDefaultAsync(h => h.Email == loginRequest.email_phone || h.phone == loginRequest.email_phone);
@@ -206,7 +225,7 @@ namespace DataAccess.Repo
                         Id = user.Id,
                         UserName = user.Username,
                         Email = user.Email,
-                        phone=user.phone,
+                        phone = user.phone,
                         name = user.Name,
                         Role = user.Role != null ? new RoleDto
                         {
@@ -227,6 +246,7 @@ namespace DataAccess.Repo
                 return null;
             }
         }
+
 
 
 

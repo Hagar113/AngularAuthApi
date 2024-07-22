@@ -35,5 +35,6 @@ namespace Models.DTOs.Request
         //[UserValidations("AcademicYear")]  
         public string academicYear { get; set; }
         public DateTime dateOfBirth { get; set; }
+        public string? languageCode { get; set; }
     }
 }
