@@ -61,7 +61,7 @@ if (app.Environment.IsDevelopment())
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
 
-
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 app.UseRouting();
 app.UseCors(corsPolicyBuilder => corsPolicyBuilder
     .AllowAnyHeader()
