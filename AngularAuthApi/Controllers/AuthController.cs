@@ -33,51 +33,51 @@ namespace AngularAuthApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<ActionResult<GeneralResponse>> Login([FromBody] BaseRequestHeader loginRequest)
+        public async Task<GeneralResponse> Login([FromBody] BaseRequestHeader loginRequest)
         {
             if (loginRequest == null)
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]);
             }
 
             var result = await _authProvider.AuthenticationRepo.Login(loginRequest);
             if (result == null)
             {
-                return NotFound(GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["UserNotFound"]));
+                return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["UserNotFound"]);
             }
 
-            return Ok(GeneralResponse.Create(HttpStatusCode.OK, result, _localizer["LoginSuccessful"]));
+            return GeneralResponse.Create(HttpStatusCode.OK, result, _localizer["LoginSuccessful"]);
         }
 
         [HttpPost("Register")]
-        public async Task<ActionResult<GeneralResponse>> Register([FromBody] BaseRequestHeader baseRequest)
+        public async Task<GeneralResponse> Register([FromBody] BaseRequestHeader baseRequest)
         {
             if (baseRequest == null)
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]);
             }
 
             var registerRequest = Deserialization.Deserialize<RegisterRequest>(baseRequest.data.ToString());
             if (registerRequest == null)
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DeserializationFailed"]));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DeserializationFailed"]);
             }
 
             var validationResults = ValidateRegisterRequest(registerRequest);
             if (validationResults.Any())
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ValidationFailed"], validationResults));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ValidationFailed"], validationResults);
             }
 
             if (await _authProvider.AuthenticationRepo.checkIfEmailOrPhoneOrUsernameExists(registerRequest.email, registerRequest.phone))
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["EmailOrPhoneExists"]));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["EmailOrPhoneExists"]);
             }
 
             var validation = _authProvider.AuthenticationRepo.CheckPasswordStrength(registerRequest.password);
             if (!string.IsNullOrEmpty(validation))
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, validation));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, validation);
             }
 
             // Create BaseRequestHeader with serialized RegisterRequest
@@ -91,15 +91,13 @@ namespace AngularAuthApi.Controllers
             var registered = await _authProvider.AuthenticationRepo.UserRegister(headerRequest);
             if (registered)
             {
-                return Ok(GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["RegistrationSuccessful"]));
+                return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["RegistrationSuccessful"]);
             }
             else
             {
-                return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["RoleNotExist"]));
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["RoleNotExist"]);
             }
         }
-
-
 
         private ICollection<string> ValidateRegisterRequest(RegisterRequest request)
         {
@@ -164,46 +162,30 @@ namespace AngularAuthApi.Controllers
         }
 
         [HttpGet("GetAllRoles")]
-        public async Task<ActionResult<GeneralResponse>> GetAllRoles()
+        public async Task<GeneralResponse> GetAllRoles()
         {
             try
             {
                 var roles = await _authProvider.AuthenticationRepo.GetAllRoles();
-                return Ok(GeneralResponse.Create(HttpStatusCode.OK, roles, _localizer["RolesRetrieved"]));
+                return GeneralResponse.Create(HttpStatusCode.OK, roles, _localizer["RolesRetrieved"]);
             }
             catch
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError,
-                    GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"]));
+                return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"]);
             }
         }
 
         [HttpPost("validate-user-role")]
-        public async Task<IActionResult> ValidateUserRole(userRequest request)
+        public async Task<GeneralResponse> ValidateUserRole(userRequest request)
         {
             var response = await _authProvider.AuthenticationRepo.ValidateUserRole(request);
 
             if (response == null || !response.IsValid)
             {
-                return BadRequest(new
-                {
-                    statusCode = 400,
-                    isSuccess = false,
-                    result = (object)null,
-                    errors = new
-                    {
-                        message = _localizer["InvalidUserRole"]
-                    }
-                });
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidUserRole"]);
             }
 
-            return Ok(new
-            {
-                statusCode = 200,
-                isSuccess = true,
-                result = response,
-                errors = (object)null
-            });
+            return GeneralResponse.Create(HttpStatusCode.OK, response, null);
         }
     }
 }
