@@ -45,7 +45,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 #endregion
 
 var app = builder.Build();
-
+app.UseHttpLogging();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
