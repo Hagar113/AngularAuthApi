@@ -67,12 +67,7 @@ namespace AngularAuthApi.Controllers
             }
         }
 
-        [HttpGet("StudentPage")]
-        public IActionResult StudentPage()
-        {
-            // Logic for Student Page
-            return Ok("Student Page");
-        }
+        
     }
 }
 

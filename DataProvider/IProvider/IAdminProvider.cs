@@ -12,3 +12,4 @@ namespace DataProvider.IProvider
         public IAdminRepo AdminRepo { get; }
     }
 }
+

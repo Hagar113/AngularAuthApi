@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Request
 {
-    public class GetSubjectsByYearRequest
+    public class SaveRoleReques
     {
-
-        public int AcademicYear { get; set; }
+        public int roleId { get; set; }
+        public string roleName { get; set; }
+        public string roleCode { get; set; }
 
     }
 }

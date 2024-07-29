@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Request
 {
-    public class SaveTeacherRequest
+    public class RoleRequest
     {
-
-        public int id { get; set; }
-        public string name { get; set; }
-        public int userId { get; set; }
+        public int RoleId { get; set; }
     }
+
 }

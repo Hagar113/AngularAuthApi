@@ -1,9 +1,12 @@
-﻿using DataAccess;
-using DataAccess.IRepo;
-using DataProvider.IProvider;
+﻿using DataProvider.IProvider;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using Models.DTOs.BaseRequest;
 using Models.DTOs.Request;
+using Models.DTOs.Response;
+using Models.models;
+using Newtonsoft.Json;
 using System.Net;
 
 namespace AngularAuthApi.Controllers
@@ -12,352 +15,286 @@ namespace AngularAuthApi.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly IAdminRepo _adminRepo;
 
-        public AdminController(IAdminRepo adminRepo)
+        private readonly IAdminProvider _adminProvider;
+        private readonly IStringLocalizer _localizer;
+        public AdminController(IAdminProvider adminProvider, IStringLocalizer<AuthController> localizer)
         {
-            _adminRepo = adminRepo;
+            _adminProvider = adminProvider;
+            _localizer = localizer;
+           
+    }
 
-        }
-        #region subject methods
-        [HttpGet("GetAllSubjects")]
-        public async Task<IActionResult> GetSubjectDropdown([FromQuery] GetSubjectsByYearRequest request)
+        #region roles
+        [HttpPost("GetRoleById")]
+        public async Task<IActionResult> GetRoleById([FromBody] BaseRequestHeader request)
         {
+            GeneralResponse response;
+
             try
             {
-                var subjects = await _adminRepo.GetSubjectsDropdown(request);
-                return Ok(subjects);
+                if (request == null || request.data == null)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                RoleRequest roleRequest;
+                try
+                {
+                    roleRequest = JsonConvert.DeserializeObject<RoleRequest>(request.data.ToString());
+                }
+                catch (JsonException)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                if (roleRequest == null || roleRequest.RoleId <= 0)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                // Removed redundant declaration of roleRequest
+                var role = await _adminProvider.AdminRepo.GetRoleById(roleRequest);
+                if (role != null)
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.OK, role, _localizer["DataRetrievedSuccessfully"]);
+                    return Ok(response);
+                }
+                else
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["RoleNotFound"]);
+                    return NotFound(response);
+                }
             }
             catch
             {
-                return BadRequest(new { msg = "حدث خطأ برجاء المحاولة في وقت لاحق" });
+                response = GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        [HttpPost("GetAllRoles")]
+        public async Task<IActionResult> GetAllRoles([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                
+                var roles = await _adminProvider.AdminRepo.GetAllRoles();
+                var response = GeneralResponse.Create(HttpStatusCode.OK, roles, _localizer["Rolesretrievedsuccessfully"]);
+                return Ok(response);
+            }
+            catch
+            {
+                var errorResponse = GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return BadRequest(errorResponse);
+            }
+        }
+
+        [HttpPost("DeleteRole")]
+        public async Task<GeneralResponse> DeleteRole([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            if (baseRequestHeader == null || string.IsNullOrEmpty(baseRequestHeader.data.ToString()))
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]);
+            }
+
+            try
+            {
+                // Deserialize the 'data' field to get the roleId
+                var roleRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<RoleRequest>(baseRequestHeader.data.ToString());
+
+                var result = await _adminProvider.AdminRepo.DeleteRole(roleRequest);
+
+                if (result)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["RoleDeletedSuccessfully"]);
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["FailedToDeleteRole"]);
+                }
+            }
+            catch
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
             }
         }
 
 
-        [HttpPost("SaveSubject")]
-        public async Task<IActionResult> SaveSubject(SaveSubjectRequest saveSubjectsReq)
+        [HttpPost("SaveRole")]
+        public async Task<GeneralResponse> SaveRole([FromBody] BaseRequestHeader baseRequestHeader)
         {
             try
             {
-                var status = await _adminRepo.SaveSubject(saveSubjectsReq);
+                
+                var saveRoleRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveRoleReques>(baseRequestHeader.data.ToString());
+
+                if (saveRoleRequest == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+                }
+
+                var status = await _adminProvider.AdminRepo.SaveRole(saveRoleRequest);
+
                 if (status == 1)
                 {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = (object)null,
-                        Message = "Save SuccessFully"
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["RoleSavedSuccessfully"]);
                 }
                 else if (status == -1)
                 {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "An error occurred"
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+                }
+                else if (status == -2)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["RoleNotFound"]);
                 }
                 else
                 {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Id not found "
-                    });
-                }
-            }
-            catch
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "An error occurred"
-                });
-            }
-        }
-
-        [HttpPost("GetSubjectById")]
-        public async Task<IActionResult> GetSubjectById(SubjectRequest request)
-        {
-            try
-            {
-                var subject = await _adminRepo.GetSubjectById(request);
-                if (subject != null)
-                {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = subject,
-                        Message = "تم بنجاح"
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "المادة غير موجودة"
-                    });
-                }
-            }
-            catch
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "حدث خطأ برجاء المحاولة في وقت لاحق"
-                });
-            }
-        }
-
-        [HttpPost("DeleteSubject")]
-        public async Task<IActionResult> DeleteSubject(SubjectRequest subjectRequest)
-        {
-            if (subjectRequest == null || subjectRequest.id <= 0)
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "Invalid request data"
-                });
-            }
-
-            try
-            {
-                var isDeleted = await _adminRepo.DeleteSubject(subjectRequest);
-                if (isDeleted)
-                {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = (object)null,
-                        Message = "Successfully deleted"
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Subject not found or already deleted"
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
                 }
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine($"An error occurred while deleting subject: {ex.Message}");
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "An error occurred"
-                });
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
             }
         }
+
+
+
         #endregion
 
-        #region student methods
-        [HttpGet("GetAllStudents")]
-        public async Task<IActionResult> GetAllStudents()
+
+        #region
+
+        [HttpPost("GetSubjectById")]
+        public async Task<IActionResult> GetSubjectById([FromBody] BaseRequestHeader request)
         {
+            GeneralResponse response;
+
             try
             {
-                var student = await _adminRepo.GetAllStudents();
-                return Ok(student);
+                if (request == null || request.data == null)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                SubjectRequest subjectRequest;
+                try
+                {
+                    subjectRequest = JsonConvert.DeserializeObject<SubjectRequest>(request.data.ToString());
+                }
+                catch (JsonException)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                if (subjectRequest == null || subjectRequest.SubjectId <= 0)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                var subject = await _adminProvider.AdminRepo.GetSubjectById(subjectRequest);
+                if (subject != null)
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.OK, subject, _localizer["DataRetrievedSuccessfully"]);
+                    return Ok(response);
+                }
+                else
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["SubjectNotFound"]);
+                    return NotFound(response);
+                }
             }
-            catch { return BadRequest(new { msg = "حدث خطأ برجاء المحاولة في وقت لاحق" }); }
+            catch
+            {
+                response = GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
-        [HttpPost("SaveStudent")]
-        public async Task<IActionResult> SaveStudent(SaveStudentRequest saveStudentsReq)
+        [HttpPost("GetAllSubjects")]
+        public async Task<IActionResult> GetAllSubjects([FromBody] BaseRequestHeader baseRequestHeader)
         {
             try
             {
-                var status = await _adminRepo.SaveStudent(saveStudentsReq);
+                var subjects = await _adminProvider.AdminRepo.GetAllSubjects();
+                var response = GeneralResponse.Create(HttpStatusCode.OK, subjects, _localizer["SubjectsRetrievedSuccessfully"]);
+                return Ok(response);
+            }
+            catch
+            {
+                var errorResponse = GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return BadRequest(errorResponse);
+            }
+        }
+
+        [HttpPost("DeleteSubject")]
+        public async Task<GeneralResponse> DeleteSubject([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            if (baseRequestHeader == null || string.IsNullOrEmpty(baseRequestHeader.data.ToString()))
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]);
+            }
+
+            try
+            {
+                // Deserialize the 'data' field to get the SubjectId
+                var subjectRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SubjectRequest>(baseRequestHeader.data.ToString());
+
+                var result = await _adminProvider.AdminRepo.DeleteSubject(subjectRequest);
+
+                if (result)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["SubjectDeletedSuccessfully"]);
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["FailedToDeleteSubject"]);
+                }
+            }
+            catch
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+            }
+        }
+
+        [HttpPost("SaveSubject")]
+        public async Task<GeneralResponse> SaveSubject([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                var saveSubjectRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveSubjectRequest>(baseRequestHeader.data.ToString());
+
+                if (saveSubjectRequest == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+                }
+
+                var status = await _adminProvider.AdminRepo.SaveSubject(saveSubjectRequest);
+
                 if (status == 1)
                 {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = (object)null,
-                        Message = "Save SuccessFully"
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["SubjectSavedSuccessfully"]);
                 }
                 else if (status == -1)
                 {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "An error occurred"
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+                }
+                else if (status == -2)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["SubjectNotFound"]);
                 }
                 else
                 {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Id not found "
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
                 }
             }
             catch
             {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "An error occurred"
-                });
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
             }
         }
-
-        [HttpPost("GetStudentById")]
-        public async Task<IActionResult> GetStudentById(studentReq request)
-        {
-            try
-            {
-                var student = await _adminRepo.GetStudentById(request);
-                if (student != null)
-                {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = student,
-                        Message = "تم بنجاح"
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "المادة غير موجودة"
-                    });
-                }
-            }
-            catch
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "حدث خطأ برجاء المحاولة في وقت لاحق"
-                });
-            }
-        }
-
-
 
         #endregion
-
-        #region teacher
-        [HttpGet("GetAllTeachers")]
-        public async Task<IActionResult> GetAllTeachers()
-        {
-            try
-            {
-                var teacher = await _adminRepo.GetAllTeachers();
-                return Ok(teacher);
-            }
-            catch { return BadRequest(new { msg = "حدث خطأ برجاء المحاولة في وقت لاحق" }); }
-        }
-
-        [HttpPost("SaveTeachers")]
-        public async Task<IActionResult> SaveTeacher(SaveTeacherRequest saveTeachersReq)
-        {
-            try
-            {
-                var status = await _adminRepo.SaveTeacher(saveTeachersReq);
-                if (status == 1)
-                {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = (object)null,
-                        Message = "Save SuccessFully"
-                    });
-                }
-                else if (status == -1)
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "An error occurred"
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Id not found "
-                    });
-                }
-            }
-            catch
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "An error occurred"
-                });
-            }
-        }
-
-        [HttpPost("GetTeacherById")]
-        public async Task<IActionResult> GetTeacherById(TeacherRequest request)
-        {
-            try
-            {
-                var teacher = await _adminRepo.GetTeacherById(request);
-                if (teacher != null)
-                {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = teacher,
-                        Message = "تم بنجاح"
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "teacher not found"
-                    });
-                }
-            }
-            catch
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "an error occour"
-                });
-            }
-        }
-
-
-       
-        #endregion
-
     }
 }

@@ -8,6 +8,7 @@ namespace Models.DTOs.Request
 {
     public class SubjectRequest
     {
-        public int id {  get; set; }
+        public int SubjectId { get; set; }
     }
+
 }

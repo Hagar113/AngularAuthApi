@@ -14,5 +14,19 @@
   "InvalidTeacherAge": "بالنسبة للمعلمين، يجب أن يكون العمر بين 25 و 60",
   "RolesRetrieved": "تم استرجاع الأدوار بنجاح",
   "ErrorOccurred": "حدث خطأ، يرجى المحاولة مرة أخرى لاحقاً",
-  "InvalidUserRole": "الدور أو المستخدم غير صحيح."
+  "InvalidUserRole": "الدور أو المستخدم غير صحيح.",
+  "Rolesretrievedsuccessfully": "تم ارجاع الدور بنجاح",
+
+  "RoleDeletedSuccessfully": "تم حذف الدور بنجاح",
+  "FailedToDeleteRole": "فشل في حذف الدور",
+  "RoleNotFound": "الدور المحدد غير موجود",
+  "UnexpectedError": "حدث خطأ",
+  "InvalidData": "البيانات غير صالحة",
+  "RoleSavedSuccessfully": "تم حفظ الدور بنجاح",
+  "SubjectDeletedSuccessfully": "تم حذف المادة الدراسية بنجاح",
+  "FailedToDeleteSubject": "فشل في حذف المادة الدراسية",
+  "SubjectSavedSuccessfully": "تم حفظ المادة الدراسية بنجاح",
+  "SubjectNotFound": "المادة الدراسية المحددة غير موجودة"
+
+
 }

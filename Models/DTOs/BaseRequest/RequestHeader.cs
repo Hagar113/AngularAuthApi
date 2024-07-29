@@ -12,11 +12,8 @@ namespace Models.DTOs.BaseRequest
      
         public string? languageCode { get; set; }
         public object data { get; set; }
-        //
+        
     }
-    //public class RegisterReuestHeader
-    //{
-    //    public string? requestHeader { get; set; }
-    //}
+   
 
 }

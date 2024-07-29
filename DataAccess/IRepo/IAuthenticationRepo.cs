@@ -25,6 +25,7 @@ namespace DataAccess.IRepo
         Task<bool> IsRoleAssignedToUser(int userId, string roleCode);
         Task<PagesResponse> ValidateUserRole(userRequest request);
 
+
     }
 
 }

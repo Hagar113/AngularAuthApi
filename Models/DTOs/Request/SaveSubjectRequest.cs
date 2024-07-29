@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Request
 {
-    public class SaveSubjectRequest: BaseRequest
+    public class SaveSubjectRequest
     {
-        public int id { get; set; }
-        public string? name { get; set; }
-        public int AcademicYear { get; set; }
+        public int? SubjectId { get; set; }
+        public string SubjectName { get; set; }
+        public int academicYear { get; set; }
     }
-    public class BaseRequest
-    { 
-        public int userId { get; set; }
-    }
+
 }

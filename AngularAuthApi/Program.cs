@@ -1,14 +1,13 @@
-using AngularAuthApi.Localization;
 using AngularAuthApi.Middlewares;
 using AngularAuthApi.ServiceBinding;
 using DataAccess;
+using Infrastructure.helpers;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text.Json;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,12 +22,17 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.InjectServices();
 
-#region localization
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
-
+#region Localization
+builder.Services.AddLocalization();
 builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
 
-// Configure request localization options
+builder.Services.AddMvc()
+    .AddDataAnnotationsLocalization(options =>
+    {
+        options.DataAnnotationLocalizerProvider = (type, factory) =>
+            factory.Create(typeof(JsonStringLocalizerFactory));
+    });
+
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]
@@ -37,15 +41,14 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         new CultureInfo("ar"),
     };
 
-    options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
+    options.DefaultRequestCulture = new RequestCulture(culture: supportedCultures[0]);
     options.SupportedCultures = supportedCultures;
-    options.SupportedUICultures = supportedCultures;
 });
-
 #endregion
 
 var app = builder.Build();
-app.UseHttpLogging();
+//app.UseMiddleware<LocalizationMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -54,14 +57,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseMiddleware<LocalizationMiddleware>();
+// Apply the RequestResponseLoggingMiddleware to log requests and responses
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
-//app.UseMiddleware<LocalizationMiddleware>();
-
+// Apply request localization middleware
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
+app.UseLocalization();
 
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
 app.UseRouting();
 app.UseCors(corsPolicyBuilder => corsPolicyBuilder
     .AllowAnyHeader()

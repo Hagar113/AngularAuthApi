@@ -10,20 +10,18 @@ namespace DataAccess.IRepo
 {
     public interface IAdminRepo
     {
+        #region roles
+        Task<RoleResponse?> GetRoleById(RoleRequest roleRequest);
+        Task<List<RoleResponse>> GetAllRoles();
+        Task<bool> DeleteRole(RoleRequest roleRequest);
+        Task<int> SaveRole(SaveRoleReques saveRoleRequest);
+        #endregion
 
-        Task<List<GetSubjectsDropdown>> GetSubjectsDropdown(GetSubjectsByYearRequest request);
-        Task<int> SaveSubject(SaveSubjectRequest req);
+        #region subjects
         Task<SubjectResponse?> GetSubjectById(SubjectRequest subjectRequest);
-        Task<bool> DeleteSubject(SubjectRequest SubjectRequest);
-
-        Task<List<TeacherResponse>> GetAllTeachers();
-        Task<TeacherResponseById> GetTeacherById(TeacherRequest Request);
-        Task<int> SaveTeacher(SaveTeacherRequest req);
-        Task<List<StudentResponse>> GetAllStudents();
-        Task<StudentResponseById> GetStudentById(studentReq Request);
-        Task<int> SaveStudent(SaveStudentRequest req);
-
-
-
+        Task<List<SubjectResponse>> GetAllSubjects();
+        Task<bool> DeleteSubject(SubjectRequest subjectRequest);
+        Task<int> SaveSubject(SaveSubjectRequest saveSubjectRequest);
+        #endregion
     }
 }

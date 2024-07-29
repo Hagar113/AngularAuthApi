@@ -1,7 +1,6 @@
-﻿using AngularAuthApi.Localization;
+﻿using Infrastructure.helpers;
 using DataAccess;
 using DataProvider.IProvider;
-using Infrastructure.helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -9,12 +8,10 @@ using Models.DTOs.BaseRequest;
 using Models.DTOs.Request;
 using Models.DTOs.Response;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Infrastructure;
 
 namespace AngularAuthApi.Controllers
 {
@@ -25,7 +22,7 @@ namespace AngularAuthApi.Controllers
         private readonly IAuthProvider _authProvider;
         private readonly IStringLocalizer _localizer;
 
-        public AuthController(ApplicationDBContext context, IAuthProvider authProvider, IStringLocalizer<JsonStringLocalizer> localizer)
+        public AuthController(ApplicationDBContext context, IAuthProvider authProvider, IStringLocalizer<AuthController> localizer)
         {
             _authProvider = authProvider;
             _localizer = localizer;

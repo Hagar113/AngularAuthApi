@@ -14,8 +14,9 @@ namespace AngularAuthApi.ServiceBinding
             services.AddScoped<IStudentProvider, StudentProvider>();
 
             services.AddScoped<ITeacherProvider, TeacherProvider>();
-
             services.AddScoped<IAdminProvider, AdminProvider>();
+
+          
 
 
             

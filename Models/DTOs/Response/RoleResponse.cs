@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Response
 {
-    public class TeacherResponse
+    public class RoleResponse
     {
-        public int id {  get; set; }
-        public string name {  get; set; }
-        
+        public int id { get; set; }
+        public string name { get; set; }
+        public string roleCode { get; set; }
     }
-
 }

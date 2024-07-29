@@ -4,7 +4,7 @@
   "LoginSuccessful": "Login successful",
   "ValidationFailed": "Validation failed",
   "EmailOrPhoneExists": "Email or phone number has been used before",
-  
+
   "RegistrationSuccessful": "Successfully registered",
   "RoleNotExist": "The provided role does not exist",
   "InvalidEmail": "Invalid email address",
@@ -15,7 +15,22 @@
   "InvalidTeacherAge": "For teachers, age must be between 25 and 60",
   "RolesRetrieved": "Roles retrieved successfully",
   "ErrorOccurred": "An error occurred, please try again later",
-  "InvalidUserRole": "Invalid user or role."
+  "InvalidUserRole": "Invalid user or role.",
+  "Rolesretrievedsuccessfully": "Roles retrieved successfully",
+
+  "RoleDeletedSuccessfully": "Role Deleted Successfully",
+  "FailedToDeleteRole": "Failed To Delete Role",
+  "RoleSavedSuccessfully": "Role Saved Successfully",
+
+
+  "RoleNotFound": "The role you provided does not exist",
+  "UnexpectedError": "An unexpected error occurred",
+  "InvalidData": "The data provided is invalid",
+  "SubjectsRetrievedSuccessfully": "Subjects retrieved successfully",
+  "SubjectDeletedSuccessfully": "Subject Deleted Successfully",
+  "FailedToDeleteSubject": "Failed To Delete Subject",
+  "SubjectSavedSuccessfully": "Subject Saved Successfully",
+  "SubjectNotFound": "The subject you provided does not exist"
 }
 
 
