@@ -73,22 +73,23 @@ namespace AngularAuthApi.Controllers
             }
         }
 
-        [HttpPost("GetAllRoles")]
-        public async Task<IActionResult> GetAllRoles([FromBody] BaseRequestHeader baseRequestHeader)
+        [HttpGet("GetAllRoles")]
+        public async Task<IActionResult> GetAllRoles()
         {
             try
             {
-                
                 var roles = await _adminProvider.AdminRepo.GetAllRoles();
                 var response = GeneralResponse.Create(HttpStatusCode.OK, roles, _localizer["Rolesretrievedsuccessfully"]);
                 return Ok(response);
             }
             catch
+
             {
                 var errorResponse = GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
                 return BadRequest(errorResponse);
             }
         }
+
 
         [HttpPost("DeleteRole")]
         public async Task<GeneralResponse> DeleteRole([FromBody] BaseRequestHeader baseRequestHeader)
