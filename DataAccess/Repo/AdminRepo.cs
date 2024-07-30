@@ -117,7 +117,7 @@ namespace DataAccess.Repo
         {
             try
             {
-                if (saveRoleRequest.roleId == null || saveRoleRequest.roleId<= 0)
+                if (saveRoleRequest.id == null || saveRoleRequest.id<= 0)
                 {
                     return await AddNewRole(saveRoleRequest);
                 }
@@ -140,7 +140,7 @@ namespace DataAccess.Repo
              
                 Roles role = new Roles
                 {
-                    Name = saveRoleRequest.roleName,
+                    Name = saveRoleRequest.name,
                     code = saveRoleRequest.roleCode
                   
                 };
@@ -167,13 +167,13 @@ namespace DataAccess.Repo
             {
                 
                 var role = await _context.roles
-                    .Where(r => r.id == saveRoleRequest.roleId)
+                    .Where(r => r.id == saveRoleRequest.id)
                     .FirstOrDefaultAsync();
 
                 if (role != null)
                 {
                   
-                    role.Name = saveRoleRequest.roleName;
+                    role.Name = saveRoleRequest.name;
                     role.code= saveRoleRequest.roleCode;
                    
 

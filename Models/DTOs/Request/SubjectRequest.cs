@@ -10,5 +10,5 @@ namespace Models.DTOs.Request
     {
         public int SubjectId { get; set; }
     }
-
+    
 }
