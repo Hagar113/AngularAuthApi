@@ -219,7 +219,7 @@ namespace DataAccess.Repo
 
                 LoginResponse loginResponse = new LoginResponse
                 {
-                    Token = GenerateJwtToken(user),
+                    token = GenerateJwtToken(user),
                     UserDto = new UserDto
                     {
                         Id = user.Id,
@@ -235,7 +235,7 @@ namespace DataAccess.Repo
                     }
                 };
 
-                user.Token = loginResponse.Token;
+                user.Token = loginResponse.token;
                 _context.Entry(user).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 

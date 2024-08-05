@@ -23,5 +23,12 @@ namespace DataAccess.IRepo
         Task<bool> DeleteSubject(SubjectRequest subjectRequest);
         Task<int> SaveSubject(SaveSubjectRequest saveSubjectRequest);
         #endregion
+
+        #region pages
+        Task<PageResponse?> GetPageById(PageRequest pageRequest);
+        Task<List<PageResponse>> GetAllPages();
+        Task<bool> DeletePage(PageRequest pageRequest);
+        Task<int> SavePage(SavePageRequest savePageRequest);
+        #endregion
     }
 }

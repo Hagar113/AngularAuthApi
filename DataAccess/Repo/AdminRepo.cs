@@ -36,6 +36,7 @@ namespace DataAccess.Repo
                 
                 var role = await _context.roles
                     .Where(r => r.id == roleRequest.RoleId)
+                    
                     .FirstOrDefaultAsync();
 
                 if (role != null)
@@ -353,6 +354,161 @@ namespace DataAccess.Repo
 
 
         #endregion
+
+
+        #region pages
+
+        public async Task<PageResponse?> GetPageById(PageRequest pageRequest)
+        {
+            try
+            {
+                var page = await _context.pages
+                    .Where(p => p.id == pageRequest.PageId)
+                    .FirstOrDefaultAsync();
+
+                if (page != null)
+                {
+                    PageResponse res = new PageResponse
+                    {
+                        id = page.id,
+                        name = page.name,
+                    };
+                    return res;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch
+            {
+                // Log the exception
+                return null;
+            }
+        }
+
+        public async Task<List<PageResponse>> GetAllPages()
+        {
+            try
+            {
+                List<PageResponse> pageResponses = new List<PageResponse>();
+                var pages = await _context.pages.ToListAsync();
+                if (pages != null)
+                {
+                    foreach (var page in pages)
+                    {
+                        pageResponses.Add(new PageResponse
+                        {
+                            id = page.id,
+                            name = page.name,
+                        });
+                    }
+                }
+                return pageResponses;
+            }
+            catch
+            {
+                // Log the exception
+                return new List<PageResponse>();
+            }
+        }
+
+        public async Task<bool> DeletePage(PageRequest pageRequest)
+        {
+            try
+            {
+                var page = await _context.pages.FindAsync(pageRequest.PageId);
+
+                if (page != null)
+                {
+                    _context.pages.Remove(page);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return false;
+            }
+        }
+
+        public async Task<int> SavePage(SavePageRequest savePageRequest)
+        {
+            try
+            {
+                if (savePageRequest.id == null || savePageRequest.id <= 0)
+                {
+                    return await AddNewPage(savePageRequest);
+                }
+                else
+                {
+                    return await UpdatePage(savePageRequest);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return -1;
+            }
+        }
+
+        private async Task<int> AddNewPage(SavePageRequest savePageRequest)
+        {
+            try
+            {
+                Pages page = new Pages
+                {
+                    name = savePageRequest.name,
+                };
+
+                await _context.pages.AddAsync(page);
+                await _context.SaveChangesAsync();
+
+                return 1;
+            }
+            catch
+            {
+                // Log the exception
+                return -1;
+            }
+        }
+
+        private async Task<int> UpdatePage(SavePageRequest savePageRequest)
+        {
+            try
+            {
+                var page = await _context.pages
+                    .Where(p => p.id == savePageRequest.id)
+                    .FirstOrDefaultAsync();
+
+                if (page != null)
+                {
+                    page.name = savePageRequest.name;
+
+                    _context.Entry(page).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    return 1;
+                }
+                else
+                {
+                    return -2;
+                }
+            }
+            catch
+            {
+                // Log the exception
+                return -1;
+            }
+        }
+
+        #endregion
+
 
     }
 }

@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Request
 {
-    public class SaveRoleReques
+    public class SavePageRequest
     {
-        public int id { get; set; }
+        public int? id { get; set; } 
         public string name { get; set; }
-        public string roleCode { get; set; }
-        public List<int> PageIds { get; set; }
-
     }
+
 }

@@ -297,5 +297,139 @@ namespace AngularAuthApi.Controllers
         }
 
         #endregion
+
+
+        #region pages
+
+        [HttpPost("GetPageById")]
+        public async Task<IActionResult> GetPageById([FromBody] BaseRequestHeader request)
+        {
+            GeneralResponse response;
+
+            try
+            {
+                if (request == null || request.data == null)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                PageRequest pageRequest;
+                try
+                {
+                    pageRequest = JsonConvert.DeserializeObject<PageRequest>(request.data.ToString());
+                }
+                catch (JsonException)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                if (pageRequest == null || pageRequest.PageId <= 0)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                var page = await _adminProvider.AdminRepo.GetPageById(pageRequest);
+                if (page != null)
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.OK, page, _localizer["DataRetrievedSuccessfully"]);
+                    return Ok(response);
+                }
+                else
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["PageNotFound"]);
+                    return NotFound(response);
+                }
+            }
+            catch
+            {
+                response = GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        [HttpGet("GetAllPages")]
+        public async Task<IActionResult> GetAllPages()
+        {
+            try
+            {
+                var pages = await _adminProvider.AdminRepo.GetAllPages();
+                var response = GeneralResponse.Create(HttpStatusCode.OK, pages, _localizer["PagesRetrievedSuccessfully"]);
+                return Ok(response);
+            }
+            catch
+            {
+                var errorResponse = GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return BadRequest(errorResponse);
+            }
+        }
+
+        [HttpPost("DeletePage")]
+        public async Task<GeneralResponse> DeletePage([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            if (baseRequestHeader == null || string.IsNullOrEmpty(baseRequestHeader.data.ToString()))
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]);
+            }
+
+            try
+            {
+                var pageRequest = JsonConvert.DeserializeObject<PageRequest>(baseRequestHeader.data.ToString());
+
+                var result = await _adminProvider.AdminRepo.DeletePage(pageRequest);
+
+                if (result)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["PageDeletedSuccessfully"]);
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["FailedToDeletePage"]);
+                }
+            }
+            catch
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+            }
+        }
+
+        [HttpPost("SavePage")]
+        public async Task<GeneralResponse> SavePage([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                var savePageRequest = JsonConvert.DeserializeObject<SavePageRequest>(baseRequestHeader.data.ToString());
+
+                if (savePageRequest == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+                }
+
+                var status = await _adminProvider.AdminRepo.SavePage(savePageRequest);
+
+                if (status == 1)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["PageSavedSuccessfully"]);
+                }
+                else if (status == -1)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+                }
+                else if (status == -2)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["PageNotFound"]);
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+            }
+        }
+
+        #endregion
+
     }
 }

@@ -20,19 +20,6 @@ namespace Models.models
         public int PageId { get; set; }
         public Pages pages { get; set; }
 
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    var validationResults = new List<ValidationResult>();
-
-        //    if ((Roles.code == "STUDENT_CODE" ) ||
-        //        (Roles.code == "TEACHER_CODE" ))
-        //    {
-        //        validationResults.Add(new ValidationResult("Invalid role-page combination.", new[] { "RoleId", "PageId" }));
-        //    }
-
-        //    return validationResults;
-        //}
-
-        //: IValidatableObject
+        
     }
 }

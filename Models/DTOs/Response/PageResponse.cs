@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.DTOs.Request
+namespace Models.DTOs.Response
 {
-    public class SaveRoleReques
+    public class PageResponse
     {
         public int id { get; set; }
         public string name { get; set; }
-        public string roleCode { get; set; }
-        public List<int> PageIds { get; set; }
-
     }
+
 }
