@@ -376,6 +376,7 @@ namespace DataAccess.Repo
                     {
                         id = page.id,
                         name = page.name,
+                        path = page.path,
                     };
                     return res;
                 }
@@ -405,6 +406,7 @@ namespace DataAccess.Repo
                         {
                             id = page.id,
                             name = page.name,
+                            path= page.path,
                         });
                     }
                 }
@@ -468,6 +470,7 @@ namespace DataAccess.Repo
                 Pages page = new Pages
                 {
                     name = savePageRequest.name,
+                    
                 };
 
                 await _context.pages.AddAsync(page);
