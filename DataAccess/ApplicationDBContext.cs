@@ -35,7 +35,7 @@ namespace DataAccess
             modelBuilder.Entity<Users>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
-
+            modelBuilder.Entity<Subjects>().HasQueryFilter(s => !s.isDeleted ?? false);
         }
 
         public DbSet<Users> users { get; set; }

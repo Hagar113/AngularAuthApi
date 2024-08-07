@@ -16,6 +16,7 @@ namespace Models.DTOs.Response
     {
         public int PageId { get; set; }
         public string PageName { get; set; }
+        public string PagePath { get; set; }
     }
 
 }

@@ -209,7 +209,7 @@ namespace DataAccess.Repo
             try
             {
                 var subject = await _context.subjects
-                    .Where(s => s.Id == subjectRequest.SubjectId)
+                    .Where(s => s.Id == subjectRequest.SubjectId && (s.isDeleted == false || s.isDeleted == null))
                     .FirstOrDefaultAsync();
 
                 if (subject != null)
@@ -218,13 +218,12 @@ namespace DataAccess.Repo
                     {
                         id = subject.Id,
                         name = subject.Name,
-                        academicYear= subject.AcademicYear,
+                        academicYear = subject.AcademicYear
                     };
                     return res;
                 }
                 else
                 {
-                   
                     return null;
                 }
             }
@@ -240,7 +239,10 @@ namespace DataAccess.Repo
             try
             {
                 List<SubjectResponse> subjectResponses = new List<SubjectResponse>();
-                var subjects = await _context.subjects.ToListAsync();
+
+                // Get all subjects where IsDeleted is false
+                var subjects = await _context.subjects.Where(s => !s.isDeleted ?? false).ToListAsync();
+
                 if (subjects != null)
                 {
                     foreach (var subject in subjects)
@@ -249,8 +251,7 @@ namespace DataAccess.Repo
                         {
                             id = subject.Id,
                             name = subject.Name,
-                            academicYear = subject.AcademicYear,
-
+                            academicYear = subject.AcademicYear
                         });
                     }
                 }
@@ -262,6 +263,8 @@ namespace DataAccess.Repo
             }
         }
 
+
+
         public async Task<bool> DeleteSubject(SubjectRequest subjectRequest)
         {
             try
@@ -270,7 +273,8 @@ namespace DataAccess.Repo
 
                 if (subject != null)
                 {
-                    _context.subjects.Remove(subject);
+                    subject.isDeleted = true; 
+                    _context.subjects.Update(subject);
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -281,10 +285,10 @@ namespace DataAccess.Repo
             }
             catch
             {
-            
                 return false;
             }
         }
+
 
         public async Task<int> SaveSubject(SaveSubjectRequest saveSubjectRequest)
         {
