@@ -347,7 +347,8 @@ namespace DataAccess.Repo
                     .Select(rp => new PageDto
                     {
                         PageId = rp.PageId,
-                        PageName = rp.pages.name 
+                        PageName = rp.pages.name,
+                        PagePath = rp.pages.path
                     })
                     .ToListAsync();
 

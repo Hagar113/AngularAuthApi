@@ -7,6 +7,6 @@ namespace DataAccess.IRepo
     {
         
 
-        Task<int> SaveStudentSubjectTeacherAsync(SaveStudentSubjectTeacher request);
+        //Task<int> SaveStudentSubjectTeacherAsync(SaveStudentSubjectTeacher request);
     }
 }

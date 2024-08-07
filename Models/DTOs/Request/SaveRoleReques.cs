@@ -11,7 +11,7 @@ namespace Models.DTOs.Request
         public int id { get; set; }
         public string name { get; set; }
         public string roleCode { get; set; }
-        public List<int> PageIds { get; set; }
+        public List<int> SelectedPageIds { get; set; }
 
     }
 }

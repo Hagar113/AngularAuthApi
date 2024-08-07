@@ -14,7 +14,7 @@ namespace DataAccess.IRepo
         Task<RoleResponse?> GetRoleById(RoleRequest roleRequest);
         Task<List<RoleResponse>> GetAllRoles();
         Task<bool> DeleteRole(RoleRequest roleRequest);
-        Task<int> SaveRole(SaveRoleReques saveRoleRequest);
+        Task<int> SaveRole(SaveRoleReques saveRoleRequest, List<int> selectedPageIds);
         #endregion
 
         #region subjects
@@ -26,7 +26,7 @@ namespace DataAccess.IRepo
 
         #region pages
         Task<PageResponse?> GetPageById(PageRequest pageRequest);
-        Task<List<PageResponse>> GetAllPages();
+        Task<List<PageDto>> GetAllPages();
         Task<bool> DeletePage(PageRequest pageRequest);
         Task<int> SavePage(SavePageRequest savePageRequest);
         #endregion

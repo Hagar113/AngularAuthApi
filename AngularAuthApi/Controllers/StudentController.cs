@@ -22,50 +22,50 @@ namespace AngularAuthApi.Controllers
 
        
 
-        [HttpPost("SaveStudentSubjectTeacher")]
-        public async Task<IActionResult> SaveStudentSubjectTeacher([FromBody] SaveStudentSubjectTeacher request)
-        {
-            if (ModelState.IsValid)
-            {
-                var result = await _studentRepo.SaveStudentSubjectTeacherAsync(request);
-                if (result == 1)
-                {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = (object)null,
-                        Message = "Data saved successfully"
-                    });
-                }
-                else if (result == -2)
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Subject already assigned to a teacher for this student"
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Failed to save data"
-                    });
-                }
-            }
-            else
-            {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "Invalid request"
-                });
-            }
-        }
+        //[HttpPost("SaveStudentSubjectTeacher")]
+        //public async Task<IActionResult> SaveStudentSubjectTeacher([FromBody] SaveStudentSubjectTeacher request)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var result = await _studentRepo.SaveStudentSubjectTeacherAsync(request);
+        //        if (result == 1)
+        //        {
+        //            return Ok(new
+        //            {
+        //                Status = HttpStatusCode.OK,
+        //                Data = (object)null,
+        //                Message = "Data saved successfully"
+        //            });
+        //        }
+        //        else if (result == -2)
+        //        {
+        //            return BadRequest(new
+        //            {
+        //                Status = HttpStatusCode.BadRequest,
+        //                Data = (object)null,
+        //                Message = "Subject already assigned to a teacher for this student"
+        //            });
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(new
+        //            {
+        //                Status = HttpStatusCode.BadRequest,
+        //                Data = (object)null,
+        //                Message = "Failed to save data"
+        //            });
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return BadRequest(new
+        //        {
+        //            Status = HttpStatusCode.BadRequest,
+        //            Data = (object)null,
+        //            Message = "Invalid request"
+        //        });
+        //    }
+        //}
 
         
     }

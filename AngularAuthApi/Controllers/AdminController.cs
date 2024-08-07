@@ -127,16 +127,39 @@ namespace AngularAuthApi.Controllers
         {
             try
             {
-                
-                var saveRoleRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveRoleReques>(baseRequestHeader.data.ToString());
+                // Ensure baseRequestHeader is not null
+                if (baseRequestHeader == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+                }
 
+                // Deserialize the 'data' object to SaveRoleReques
+                SaveRoleReques saveRoleRequest = null;
+
+                if (baseRequestHeader.data != null)
+                {
+                    var jsonData = baseRequestHeader.data.ToString();
+                    saveRoleRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveRoleReques>(jsonData);
+                }
+
+                // Check if deserialization was successful
                 if (saveRoleRequest == null)
                 {
                     return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
                 }
 
-                var status = await _adminProvider.AdminRepo.SaveRole(saveRoleRequest);
+                // Extract the list of selected page IDs from the request
+                var selectedPageIds = saveRoleRequest.SelectedPageIds;
 
+                if (selectedPageIds == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+                }
+
+                // Call the SaveRole method in the repository
+                var status = await _adminProvider.AdminRepo.SaveRole(saveRoleRequest, selectedPageIds);
+
+                // Determine the response based on the status
                 if (status == 1)
                 {
                     return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["RoleSavedSuccessfully"]);
@@ -156,6 +179,7 @@ namespace AngularAuthApi.Controllers
             }
             catch (Exception ex)
             {
+                // Optionally log the exception here
                 return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
             }
         }
@@ -392,42 +416,38 @@ namespace AngularAuthApi.Controllers
             }
         }
 
-        [HttpPost("SavePage")]
-        public async Task<GeneralResponse> SavePage([FromBody] BaseRequestHeader baseRequestHeader)
-        {
-            try
-            {
-                var savePageRequest = JsonConvert.DeserializeObject<SavePageRequest>(baseRequestHeader.data.ToString());
+        //[HttpPost("SaveRole")]
+        //public async Task<GeneralResponse> SaveRole([FromBody] SaveRoleReques saveRoleRequest, [FromQuery] List<int> pageIds)
+        //{
+        //    try
+        //    {
+        //        var status = await _adminProvider.AdminRepo.SaveRole(saveRoleRequest, pageIds);
 
-                if (savePageRequest == null)
-                {
-                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
-                }
+        //        if (status == 1)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["RoleSavedSuccessfully"]);
+        //        }
+        //        else if (status == -1)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+        //        }
+        //        else if (status == -2)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["RoleNotFound"]);
+        //        }
+        //        else
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log exception if needed
+        //        return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+        //    }
+        //}
 
-                var status = await _adminProvider.AdminRepo.SavePage(savePageRequest);
 
-                if (status == 1)
-                {
-                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["PageSavedSuccessfully"]);
-                }
-                else if (status == -1)
-                {
-                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
-                }
-                else if (status == -2)
-                {
-                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["PageNotFound"]);
-                }
-                else
-                {
-                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
-                }
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
-            }
-        }
 
         #endregion
 

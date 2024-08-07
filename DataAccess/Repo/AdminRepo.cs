@@ -114,51 +114,77 @@ namespace DataAccess.Repo
             }
         }
 
-        public async Task<int> SaveRole(SaveRoleReques saveRoleRequest)
+        public async Task<int> SaveRole(SaveRoleReques saveRoleRequest, List<int> selectedPageIds)
         {
             try
             {
-                if (saveRoleRequest.id == null || saveRoleRequest.id<= 0)
+                // Check if the role is new or existing
+                int roleId;
+                if (saveRoleRequest.id == null || saveRoleRequest.id <= 0)
                 {
-                    return await AddNewRole(saveRoleRequest);
+                    roleId = await AddNewRole(saveRoleRequest);
                 }
                 else
                 {
-                    return await UpdateRole(saveRoleRequest);
+                    roleId = await UpdateRole(saveRoleRequest);
+                }
+
+                // Save or update the role-page relationships
+                if (roleId > 0)
+                {
+                    await SaveRolePages(roleId, selectedPageIds);
+                    return 1; // Success
+                }
+                else
+                {
+                    return -1; // Failure to save role
                 }
             }
             catch (Exception ex)
             {
-              
-                return -1;
+                // Log exception if needed
+                return -1; // Error occurred
             }
+        }
+
+        private async Task SaveRolePages(int roleId, List<int> pageIds)
+        {
+            // Remove existing role-page associations for this role
+            var existingRolePages = await _context.rolepage
+                .Where(rp => rp.RoleId == roleId)
+                .ToListAsync();
+
+            _context.rolepage.RemoveRange(existingRolePages);
+
+            // Add new role-page associations
+            var rolePages = pageIds.Select(pageId => new RolePage
+            {
+                RoleId = roleId,
+                PageId = pageId
+            });
+
+            await _context.rolepage.AddRangeAsync(rolePages);
+            await _context.SaveChangesAsync();
         }
 
         private async Task<int> AddNewRole(SaveRoleReques saveRoleRequest)
         {
             try
             {
-             
                 Roles role = new Roles
                 {
                     Name = saveRoleRequest.name,
                     code = saveRoleRequest.roleCode
-                  
                 };
 
-             
                 await _context.roles.AddAsync(role);
-
-             
                 await _context.SaveChangesAsync();
 
-                
-                return 1;
+                return role.id; // Return the new role ID
             }
             catch
             {
-             
-                return -1;
+                return -1; // Failure
             }
         }
 
@@ -166,37 +192,53 @@ namespace DataAccess.Repo
         {
             try
             {
-                
                 var role = await _context.roles
                     .Where(r => r.id == saveRoleRequest.id)
                     .FirstOrDefaultAsync();
 
                 if (role != null)
                 {
-                  
                     role.Name = saveRoleRequest.name;
-                    role.code= saveRoleRequest.roleCode;
-                   
+                    role.code = saveRoleRequest.roleCode;
 
-                  
                     _context.Entry(role).State = EntityState.Modified;
-
-                 
                     await _context.SaveChangesAsync();
 
-                  
-                    return 1;
+                    return role.id; // Return the updated role ID
                 }
                 else
                 {
-                 
-                    return -2;
+                    return -2; // Role not found
                 }
             }
             catch
             {
-           
-                return -1;
+                return -1; // Failure
+            }
+        }
+
+
+        private async Task SaveRolePageAssociations(int roleId, List<int> pageIds)
+        {
+            try
+            {
+                // Remove existing associations
+                var existingAssociations = _context.rolepage.Where(rp => rp.RoleId == roleId);
+                _context.rolepage.RemoveRange(existingAssociations);
+
+                // Add new associations
+                var rolePageAssociations = pageIds.Select(pageId => new RolePage
+                {
+                    RoleId = roleId,
+                    PageId = pageId
+                }).ToList();
+
+                await _context.rolepage.AddRangeAsync(rolePageAssociations);
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                // Handle exception (logging, etc.)
             }
         }
 
@@ -392,21 +434,21 @@ namespace DataAccess.Repo
             }
         }
 
-        public async Task<List<PageResponse>> GetAllPages()
+        public async Task<List<PageDto>> GetAllPages()
         {
             try
             {
-                List<PageResponse> pageResponses = new List<PageResponse>();
+                List<PageDto> pageResponses = new List<PageDto>();
                 var pages = await _context.pages.ToListAsync();
                 if (pages != null)
                 {
                     foreach (var page in pages)
                     {
-                        pageResponses.Add(new PageResponse
+                        pageResponses.Add(new PageDto
                         {
-                            id = page.id,
-                            name = page.name,
-                            path= page.path,
+                            PageId= page.id,
+                            PageName= page.name,
+                            PagePath= page.path,
                         });
                     }
                 }
@@ -415,7 +457,7 @@ namespace DataAccess.Repo
             catch
             {
                 // Log the exception
-                return new List<PageResponse>();
+                return new List<PageDto>();
             }
         }
 

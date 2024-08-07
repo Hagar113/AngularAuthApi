@@ -8,21 +8,23 @@ using System.Threading.Tasks;
 
 namespace Models.models
 {
-    public class StudentSubjects : Defaults
+    public class ClassSchedule
     {
         [Key]
         public int Id { get; set; }
 
-        [ForeignKey("Student")]
-        public int StudentId { get; set; }
-        public Student Student { get; set; }
+        [ForeignKey("Class")]
+        public int ClassId { get; set; }
+        public Class Class { get; set; }
+
+        [ForeignKey("DayOfWeek")]
+        public int DayId { get; set; }
+        public DayOfWeek DayOfWeek { get; set; }
 
         [ForeignKey("Subject")]
         public int SubjectId { get; set; }
         public Subjects Subject { get; set; }
 
-        [ForeignKey("Teacher")]
-        public int TeacherId { get; set; }
-        public Teacher teachers { get; set; }
+        public int Hour { get; set; }
     }
 }

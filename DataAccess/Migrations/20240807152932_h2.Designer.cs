@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240806055342_hagar")]
-    partial class hagar
+    [Migration("20240807152932_h2")]
+    partial class h2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,104 @@ namespace DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("Models.models.Class", b =>
+                {
+                    b.Property<int>("ClassId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassId"), 1L, 1);
+
+                    b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ClassId");
+
+                    b.ToTable("Classes");
+                });
+
+            modelBuilder.Entity("Models.models.ClassSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DayId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DaysOfWeekDayId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("DaysOfWeekDayId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("ClassSchedules");
+                });
+
+            modelBuilder.Entity("Models.models.DaysOfWeek", b =>
+                {
+                    b.Property<int>("DayId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DayId"), 1L, 1);
+
+                    b.Property<string>("DayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DayId");
+
+                    b.ToTable("DaysOfWeek");
+
+                    b.HasData(
+                        new
+                        {
+                            DayId = 1,
+                            DayName = "Sunday"
+                        },
+                        new
+                        {
+                            DayId = 2,
+                            DayName = "Monday"
+                        },
+                        new
+                        {
+                            DayId = 3,
+                            DayName = "Tuesday"
+                        },
+                        new
+                        {
+                            DayId = 4,
+                            DayName = "Wednesday"
+                        },
+                        new
+                        {
+                            DayId = 5,
+                            DayName = "Thursday"
+                        });
+                });
 
             modelBuilder.Entity("Models.models.Pages", b =>
                 {
@@ -164,7 +262,7 @@ namespace DataAccess.Migrations
                     b.ToTable("students");
                 });
 
-            modelBuilder.Entity("Models.models.StudentSubjects", b =>
+            modelBuilder.Entity("Models.models.StudentClass", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,42 +270,19 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
                     b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeacherId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("createdAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("createdBy")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("isDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("isEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("modifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("modifiedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClassId");
+
                     b.HasIndex("StudentId");
 
-                    b.HasIndex("SubjectId");
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("studentSubjects");
+                    b.ToTable("StudentClasses");
                 });
 
             modelBuilder.Entity("Models.models.Subjects", b =>
@@ -246,6 +321,58 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("subjects");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AcademicYear = 2023,
+                            Name = "History",
+                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7863),
+                            isDeleted = false,
+                            isEnabled = true,
+                            modifiedBy = -1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AcademicYear = 2023,
+                            Name = "English",
+                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7907),
+                            isDeleted = false,
+                            isEnabled = true,
+                            modifiedBy = -1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AcademicYear = 2023,
+                            Name = "Math",
+                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7909),
+                            isDeleted = false,
+                            isEnabled = true,
+                            modifiedBy = -1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AcademicYear = 2023,
+                            Name = "Science",
+                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7911),
+                            isDeleted = false,
+                            isEnabled = true,
+                            modifiedBy = -1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AcademicYear = 2023,
+                            Name = "Arabic",
+                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7913),
+                            isDeleted = false,
+                            isEnabled = true,
+                            modifiedBy = -1
+                        });
                 });
 
             modelBuilder.Entity("Models.models.Teacher", b =>
@@ -411,6 +538,29 @@ namespace DataAccess.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("Models.models.ClassSchedule", b =>
+                {
+                    b.HasOne("Models.models.Class", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.models.DaysOfWeek", null)
+                        .WithMany("ClassSchedules")
+                        .HasForeignKey("DaysOfWeekDayId");
+
+                    b.HasOne("Models.models.Subjects", "Subject")
+                        .WithMany("ClassSchedules")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("Models.models.RolePage", b =>
                 {
                     b.HasOne("Models.models.Pages", "pages")
@@ -439,31 +589,23 @@ namespace DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Models.models.StudentSubjects", b =>
+            modelBuilder.Entity("Models.models.StudentClass", b =>
                 {
+                    b.HasOne("Models.models.Class", "Class")
+                        .WithMany("StudentClasses")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Models.models.Student", "Student")
-                        .WithMany("StudentSubjects")
+                        .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.models.Subjects", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models.models.Teacher", "teachers")
-                        .WithMany()
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Class");
 
                     b.Navigation("Student");
-
-                    b.Navigation("Subject");
-
-                    b.Navigation("teachers");
                 });
 
             modelBuilder.Entity("Models.models.Teacher", b =>
@@ -505,9 +647,19 @@ namespace DataAccess.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Models.models.Student", b =>
+            modelBuilder.Entity("Models.models.Class", b =>
                 {
-                    b.Navigation("StudentSubjects");
+                    b.Navigation("StudentClasses");
+                });
+
+            modelBuilder.Entity("Models.models.DaysOfWeek", b =>
+                {
+                    b.Navigation("ClassSchedules");
+                });
+
+            modelBuilder.Entity("Models.models.Subjects", b =>
+                {
+                    b.Navigation("ClassSchedules");
                 });
 
             modelBuilder.Entity("Models.models.Teacher", b =>
