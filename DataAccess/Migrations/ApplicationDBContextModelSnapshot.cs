@@ -56,9 +56,6 @@ namespace DataAccess.Migrations
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DaysOfWeekDayId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Hour")
                         .HasColumnType("int");
 
@@ -68,8 +65,6 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClassId");
-
-                    b.HasIndex("DaysOfWeekDayId");
 
                     b.HasIndex("SubjectId");
 
@@ -91,33 +86,6 @@ namespace DataAccess.Migrations
                     b.HasKey("DayId");
 
                     b.ToTable("DaysOfWeek");
-
-                    b.HasData(
-                        new
-                        {
-                            DayId = 1,
-                            DayName = "Sunday"
-                        },
-                        new
-                        {
-                            DayId = 2,
-                            DayName = "Monday"
-                        },
-                        new
-                        {
-                            DayId = 3,
-                            DayName = "Tuesday"
-                        },
-                        new
-                        {
-                            DayId = 4,
-                            DayName = "Wednesday"
-                        },
-                        new
-                        {
-                            DayId = 5,
-                            DayName = "Thursday"
-                        });
                 });
 
             modelBuilder.Entity("Models.models.Pages", b =>
@@ -235,6 +203,9 @@ namespace DataAccess.Migrations
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("classId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("createdAt")
                         .HasColumnType("datetime2");
 
@@ -257,30 +228,9 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("classId");
+
                     b.ToTable("students");
-                });
-
-            modelBuilder.Entity("Models.models.StudentClass", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ClassId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("StudentClasses");
                 });
 
             modelBuilder.Entity("Models.models.Subjects", b =>
@@ -319,58 +269,6 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("subjects");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AcademicYear = 2023,
-                            Name = "History",
-                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7863),
-                            isDeleted = false,
-                            isEnabled = true,
-                            modifiedBy = -1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AcademicYear = 2023,
-                            Name = "English",
-                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7907),
-                            isDeleted = false,
-                            isEnabled = true,
-                            modifiedBy = -1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AcademicYear = 2023,
-                            Name = "Math",
-                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7909),
-                            isDeleted = false,
-                            isEnabled = true,
-                            modifiedBy = -1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            AcademicYear = 2023,
-                            Name = "Science",
-                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7911),
-                            isDeleted = false,
-                            isEnabled = true,
-                            modifiedBy = -1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AcademicYear = 2023,
-                            Name = "Arabic",
-                            createdAt = new DateTime(2024, 8, 7, 18, 29, 32, 382, DateTimeKind.Local).AddTicks(7913),
-                            isDeleted = false,
-                            isEnabled = true,
-                            modifiedBy = -1
-                        });
                 });
 
             modelBuilder.Entity("Models.models.Teacher", b =>
@@ -544,10 +442,6 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.models.DaysOfWeek", null)
-                        .WithMany("ClassSchedules")
-                        .HasForeignKey("DaysOfWeekDayId");
-
                     b.HasOne("Models.models.Subjects", "Subject")
                         .WithMany("ClassSchedules")
                         .HasForeignKey("SubjectId")
@@ -584,26 +478,13 @@ namespace DataAccess.Migrations
                         .WithMany()
                         .HasForeignKey("UserId");
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Models.models.StudentClass", b =>
-                {
-                    b.HasOne("Models.models.Class", "Class")
-                        .WithMany("StudentClasses")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models.models.Student", "Student")
+                    b.HasOne("Models.models.Class", "GetClass")
                         .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("classId");
 
-                    b.Navigation("Class");
+                    b.Navigation("GetClass");
 
-                    b.Navigation("Student");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.models.Teacher", b =>
@@ -643,16 +524,6 @@ namespace DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Models.models.Class", b =>
-                {
-                    b.Navigation("StudentClasses");
-                });
-
-            modelBuilder.Entity("Models.models.DaysOfWeek", b =>
-                {
-                    b.Navigation("ClassSchedules");
                 });
 
             modelBuilder.Entity("Models.models.Subjects", b =>

@@ -7,11 +7,10 @@ namespace Models.DTOs.Request
     {
         public int id { get; set; }
 
-        //[Required(ErrorMessage = "Username is required")]
+       
         public string? userName { get; set; }
 
-        //[Required(ErrorMessage = "Email is required")]
-        //[UserValidations("Email")]  
+       
         public string? email { get; set; }
 
         //[Required(ErrorMessage = "Phone number is required")]

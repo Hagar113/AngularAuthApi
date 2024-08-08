@@ -14,7 +14,7 @@ namespace Models.models
         public int ClassId { get; set; }
         public string ClassName { get; set; }
 
-        public List<StudentClass> StudentClasses { get; set; }
+      
 
     }
 }

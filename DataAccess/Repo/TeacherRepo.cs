@@ -25,31 +25,31 @@ namespace DataAccess.Repo
         
 
 
-        public async Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request)
-        {
-            try
-            {
-                TeacherSubjects teacherSubject = new TeacherSubjects
-                {
-                    TeacherId = request.teacherId,
-                    SubjectId = request.subjectId,
-                    createdAt = DateTime.Now,
-                    createdBy = request.userId,
-                    isDeleted = false,
-                    isEnabled = true
-                };
+        //public async Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request)
+        //{
+        //    try
+        //    {
+        //        TeacherSubjects teacherSubject = new TeacherSubjects
+        //        {
+        //            TeacherId = request.teacherId,
+        //            SubjectId = request.subjectId,
+        //            createdAt = DateTime.Now,
+        //            createdBy = request.userId,
+        //            isDeleted = false,
+        //            isEnabled = true
+        //        };
 
-                _context.TeacherSubjects.Add(teacherSubject);
-                await _context.SaveChangesAsync();
+        //        _context.TeacherSubjects.Add(teacherSubject);
+        //        await _context.SaveChangesAsync();
 
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                // تسجيل الخطأ
-                return -1;
-            }
-        }
+        //        return 1;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // تسجيل الخطأ
+        //        return -1;
+        //    }
+        //}
 
     }
 }

@@ -61,7 +61,7 @@ namespace DataAccess.Repo
                     Password = encryptedPassword,
                     phone = registerRequest.phone,
                     schoolYear = registerRequest.academicYear,
-                    roleId = role.id
+                   roleId = role.id
                 };
 
                 await _context.users.AddAsync(newUser);
@@ -69,7 +69,7 @@ namespace DataAccess.Repo
 
                 switch (role.code)
                 {
-                    case "STUDENT_CODE":
+                    case "STUDENT":
                         Student newStudent = new Student
                         {
                             Name = registerRequest.firstName,
@@ -79,7 +79,7 @@ namespace DataAccess.Repo
                         Console.WriteLine("Student saved successfully");
                         break;
 
-                    case "TEACHER_CODE":
+                    case "TEACHER":
                         Teacher newTeacher = new Teacher
                         {
                             Name = registerRequest.firstName,
@@ -89,10 +89,17 @@ namespace DataAccess.Repo
                         Console.WriteLine("Teacher saved successfully");
                         break;
 
+                    case "ADMIN":
+                        // Add additional handling for the ADMIN role if needed
+                        Console.WriteLine("Admin role detected");
+                        // Since it's already added to Users table, no need to add again
+                        break;
+
                     default:
                         Console.WriteLine("Unknown role code: " + role.code);
                         return false;
                 }
+
 
                 await _context.SaveChangesAsync();
                 return true;

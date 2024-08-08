@@ -150,10 +150,18 @@ namespace AngularAuthApi.Controllers
                 {
                     if (calculatedAge < 25 || calculatedAge > 60)
                     {
-                        errors.Add(_localizer["InvalidTeacherAge"]);
+                        errors.Add(_localizer["InvalidAdminAge"]);
+                    }
+                }
+                else if (request.RoleId == 3)
+                {
+                    if (calculatedAge < 25 || calculatedAge > 60)
+                    {
+                        errors.Add(_localizer["InvalidTeacherAge"]); // Use the same error message as for RoleId 2 or create a new one if needed
                     }
                 }
             }
+
 
             return errors;
         }

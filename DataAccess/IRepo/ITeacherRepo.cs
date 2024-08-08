@@ -11,7 +11,7 @@ namespace DataAccess.IRepo
     public interface ITeacherRepo
     {
 
-        Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
+       // Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
 
 
 

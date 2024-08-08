@@ -451,5 +451,172 @@ namespace AngularAuthApi.Controllers
 
         #endregion
 
+
+        #region users
+        [HttpPost("GetUserById")]
+        public async Task<IActionResult> GetUserById([FromBody] BaseRequestHeader request)
+        {
+            GeneralResponse response;
+
+            try
+            {
+                if (request == null || request.data == null)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                UserReqById userRequest;
+                try
+                {
+                    userRequest = JsonConvert.DeserializeObject<UserReqById>(request.data.ToString());
+                }
+                catch (JsonException)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                if (userRequest == null || userRequest.userId <= 0)
+                {
+                    return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"], new { msg = _localizer["InvalidData"] }));
+                }
+
+                var user = await _adminProvider.AdminRepo.GetUserById(userRequest);
+                if (user != null)
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.OK, user, _localizer["DataRetrievedSuccessfully"]);
+                    return Ok(response);
+                }
+                else
+                {
+                    response = GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["UserNotFound"]);
+                    return NotFound(response);
+                }
+            }
+            catch
+            {
+                response = GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+
+
+        [HttpPost("SaveUser")]
+        public async Task<GeneralResponse> SaveUser([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                var saveUserRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveUserRequest>(baseRequestHeader.data.ToString());
+
+                if (saveUserRequest == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+                }
+
+                var status = await _adminProvider.AdminRepo.SaveUser(saveUserRequest);
+
+                if (status == 1)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["UserSavedSuccessfully"]);
+                }
+                else if (status == -1)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+                }
+                else if (status == -2)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["UserNotFound"]);
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
+                }
+            }
+            catch
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+            }
+        }
+        [HttpPost("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                var users = await _adminProvider.AdminRepo.GetAllUsers();
+                var response = GeneralResponse.Create(HttpStatusCode.OK, users, _localizer["UsersRetrievedSuccessfully"]);
+                return Ok(response);
+            }
+            catch
+            {
+                var errorResponse = GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"] });
+                return BadRequest(errorResponse);
+            }
+        }
+        [HttpPost("DeleteUser")]
+        public async Task<GeneralResponse> DeleteUser([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            if (baseRequestHeader == null || string.IsNullOrEmpty(baseRequestHeader.data.ToString()))
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["DataNotFound"]);
+            }
+
+            try
+            {
+                var userRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<UserReqById>(baseRequestHeader.data.ToString());
+
+                var result = await _adminProvider.AdminRepo.DeleteUser(userRequest);
+
+                if (result)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["UserDeletedSuccessfully"]);
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["FailedToDeleteUser"]);
+                }
+            }
+            catch
+            {
+                return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+            }
+        }
+        [HttpPost("SaveTeacherSubject")]
+        public async Task<IActionResult> SaveTeacherSubject([FromBody] SaveSubjectTeacherRequest request)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _adminProvider.AdminRepo.SaveTeacherSubjectAsync(request);
+                if (result == 1)
+                {
+                    return Ok(new
+                    {
+                        Status = HttpStatusCode.OK,
+                        Data = (object)null,
+                        Message = "Data saved successfully"
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Data = (object)null,
+                        Message = "Failed to save data"
+                    });
+                }
+            }
+            else
+            {
+                return BadRequest(new
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Data = (object)null,
+                    Message = "Invalid request"
+                });
+            }
+        }
+
+        #endregion
+
     }
 }

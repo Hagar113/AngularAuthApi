@@ -1,4 +1,5 @@
 ﻿using DataAccess.IRepo;
+using Infrastructure.helpers.Helper;
 using Microsoft.EntityFrameworkCore;
 using Models.DTOs.Request;
 using Models.DTOs.Response;
@@ -398,6 +399,32 @@ namespace DataAccess.Repo
             }
         }
 
+        public async Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request)
+        {
+            try
+            {
+                TeacherSubjects teacherSubject = new TeacherSubjects
+                {
+                    TeacherId = request.teacherId,
+                    SubjectId = request.subjectId,
+                    createdAt = DateTime.Now,
+                    createdBy = request.userId,
+                    isDeleted = false,
+                    isEnabled = true
+                };
+
+                _context.TeacherSubjects.Add(teacherSubject);
+                await _context.SaveChangesAsync();
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                // تسجيل الخطأ
+                return -1;
+            }
+        }
+
 
         #endregion
 
@@ -558,6 +585,281 @@ namespace DataAccess.Repo
 
         #endregion
 
+        #region user
+        //getbyid
+        public async Task<UserResponse?> GetUserById(UserReqById UserRequest)
+        {
+            try
+            {
+                var user = await _context.users
+                    .Where(s => s.Id == UserRequest.userId && (s.isDeleted == false || s.isDeleted == null))
+                    .FirstOrDefaultAsync();
 
+                if (user != null)
+                {
+                    UserResponse res = new UserResponse
+                    {
+                        id = user.Id,
+                        username = user.Username,
+                        name = user.Name,
+                        email = user.Email,
+                        phone = user.phone,
+                        age = user.Age,
+                        schoolYear = user.schoolYear,
+                        token = user.Token, // Assuming the token is stored in the User entity
+                        dateOfBirth = user.DateOfBirth,
+                        roleId = user.roleId,
+                    };
+                    return res;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Optionally log the error
+                Console.WriteLine("Error in GetUserById: " + ex.Message);
+                return null;
+            }
+        }
+
+        //save
+
+        public async Task<int> SaveUser(SaveUserRequest saveUserRequest)
+        {
+            try
+            {
+                // Step 1: Check if user exists (Add or Update)
+                Users user;
+                if (saveUserRequest.userId == null || saveUserRequest.userId <= 0)
+                {
+                    // Add new user
+                    user = await AddNewUser(saveUserRequest);
+                }
+                else
+                {
+                    // Update existing user
+                    user = await UpdateUser(saveUserRequest);
+                }
+
+                if (user == null)
+                {
+                    return -1; // Indicates failure in adding/updating user
+                }
+
+                // Step 2: Check role code and add to appropriate table
+                var role = await _context.roles.FindAsync(saveUserRequest.roleId);
+                if (role == null)
+                {
+                    return -2; // Indicates role not found
+                }
+
+                switch (role.code)
+                {
+                    case "STUDENT":
+                        await AddOrUpdateStudent(user.Id, user.Name);
+                        break;
+
+                    case "TEACHER":
+                        await AddOrUpdateTeacher(user.Id, user.Name);
+                        break;
+
+                    case "ADMIN":
+                        // No additional handling for ADMIN, already in Users table
+                        break;
+
+                    default:
+                        return -3; // Indicates unknown role code
+                }
+
+                return 1; // Indicates success
+            }
+            catch
+            {
+                return -1; // Indicates failure
+            }
+        }
+
+        private async Task<Users> AddNewUser(SaveUserRequest saveUserRequest)
+        {
+            try
+            {
+                Encryption encryption = new Encryption();
+                string encryptedPassword = encryption.Encrypt(saveUserRequest.password);
+
+                Users user = new Users
+                {
+                    Username = saveUserRequest.userName,
+                    Name = saveUserRequest.firstName,
+                    Email = saveUserRequest.email,
+                    Password = encryptedPassword,
+                    phone = saveUserRequest.phone,
+                    Age = saveUserRequest.age,
+                    schoolYear = saveUserRequest.academicYear,
+                    DateOfBirth = saveUserRequest.dateOfBirth,
+                    roleId = saveUserRequest.roleId,
+                    isDeleted = false
+                };
+
+                await _context.users.AddAsync(user);
+                await _context.SaveChangesAsync();
+
+                return user; // Return the newly added user
+            }
+            catch
+            {
+                return null; // Indicates failure
+            }
+        }
+
+        private async Task<Users> UpdateUser(SaveUserRequest saveUserRequest)
+        {
+            try
+            {
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Id == saveUserRequest.userId);
+                if (user == null)
+                {
+                    return null; // Indicates user not found
+                }
+
+                Encryption encryption = new Encryption();
+                if (!string.IsNullOrEmpty(saveUserRequest.password))
+                {
+                    user.Password = encryption.Encrypt(saveUserRequest.password);
+                }
+
+                user.Username = saveUserRequest.userName;
+                user.Name = saveUserRequest.firstName;
+                user.Email = saveUserRequest.email;
+                user.phone = saveUserRequest.phone;
+                user.Age = saveUserRequest.age;
+                user.schoolYear = saveUserRequest.academicYear;
+                user.DateOfBirth = saveUserRequest.dateOfBirth;
+                user.roleId = saveUserRequest.roleId;
+
+                _context.Entry(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return user; // Return the updated user
+            }
+            catch
+            {
+                return null; // Indicates failure
+            }
+        }
+
+        private async Task AddOrUpdateStudent(int userId, string userName)
+        {
+            var existingStudent = await _context.students.FirstOrDefaultAsync(s => s.UserId == userId);
+            if (existingStudent == null)
+            {
+                Student newStudent = new Student
+                {
+                    Name = userName,
+                    UserId = userId
+                };
+                await _context.students.AddAsync(newStudent);
+            }
+            else
+            {
+                existingStudent.Name = userName;
+                _context.Entry(existingStudent).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task AddOrUpdateTeacher(int userId, string userName)
+        {
+            var existingTeacher = await _context.teachers.FirstOrDefaultAsync(t => t.UserId == userId);
+            if (existingTeacher == null)
+            {
+                Teacher newTeacher = new Teacher
+                {
+                    Name = userName,
+                    UserId = userId
+                };
+                await _context.teachers.AddAsync(newTeacher);
+            }
+            else
+            {
+                existingTeacher.Name = userName;
+                _context.Entry(existingTeacher).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+
+        //get
+        public async Task<List<UserResponse>> GetAllUsers()
+        {
+            try
+            {
+                List<UserResponse> userResponses = new List<UserResponse>();
+
+                // Get all users where IsDeleted is false
+                var users = await _context.users.Where(u => !u.isDeleted ?? false).ToListAsync();
+
+                if (users != null)
+                {
+                    foreach (var user in users)
+                    {
+                        userResponses.Add(new UserResponse
+                        {
+                            id = user.Id,
+                            username = user.Username,
+                            name = user.Name,
+                            email = user.Email,
+                            phone = user.phone,
+                            age = user.Age,
+                            schoolYear = user.schoolYear,
+                            token = user.Token, // Assuming the token is stored in the User entity
+                            dateOfBirth = user.DateOfBirth,
+                            roleId = user.roleId
+                        });
+                    }
+                }
+
+                return userResponses;
+            }
+            catch (Exception ex)
+            {
+                // Optionally log the error
+                Console.WriteLine("Error in GetAllUsers: " + ex.Message);
+                return new List<UserResponse>();
+            }
+        }
+        public async Task<bool> DeleteUser(UserReqById userRequest)
+        {
+            try
+            {
+                
+                var user = await _context.users.FindAsync(userRequest.userId);
+
+                if (user != null)
+                {
+                   
+                    user.isDeleted = true;
+                    _context.users.Update(user);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                else
+                {
+                  
+                    return false;
+                }
+            }
+            catch
+            {
+               
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

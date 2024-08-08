@@ -30,5 +30,14 @@ namespace DataAccess.IRepo
         Task<bool> DeletePage(PageRequest pageRequest);
         Task<int> SavePage(SavePageRequest savePageRequest);
         #endregion
+
+
+        #region users
+        Task<UserResponse?> GetUserById(UserReqById UserRequest);
+        Task<int> SaveUser(SaveUserRequest saveUserRequest);
+        Task<List<UserResponse>> GetAllUsers();
+        Task<bool> DeleteUser(UserReqById userRequest);
+        Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
+        #endregion
     }
 }
