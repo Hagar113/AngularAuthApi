@@ -674,6 +674,77 @@ namespace AngularAuthApi.Controllers
         }
 
 
+        //[HttpPost("GetTeacherWithAssignedSubject")]
+        //public async Task<IActionResult> GetTeacherWithAssignedSubject([FromBody] BaseRequestHeader baseRequestHeader)
+        //{
+        //    try
+        //    {
+        //        if (!int.TryParse(baseRequestHeader.data.ToString(), out var teacherId))
+        //        {
+        //            return BadRequest(GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidTeacherId"]));
+        //        }
+
+        //        var subject = await _adminProvider.AdminRepo.GetAssignedSubjectForTeacher(teacherId);
+
+        //        if (subject == null)
+        //        {
+        //            return NotFound(GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["SubjectNotFound"]));
+        //        }
+
+        //        return Ok(GeneralResponse.Create(HttpStatusCode.OK, subject, _localizer["TeacherAndSubjectRetrievedSuccessfully"]));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode((int)HttpStatusCode.InternalServerError, GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"], new { ErrorDetails = ex.Message }));
+        //    }
+        //}
+        [HttpPost("GetAssignedSubject")]
+        public async Task<GeneralResponse> GetAssignedSubject([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                // تحقق من أن البيانات موجودة وأنها من نوع `string`
+                if (baseRequestHeader == null || baseRequestHeader.data == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Invalid request data");
+                }
+
+                // تحويل `baseRequestHeader.Data` إلى `string` إذا كان من نوع `object`
+                var jsonData = baseRequestHeader.data.ToString();
+                if (jsonData == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Data conversion error");
+                }
+
+                // ديسرياليز البيانات إلى `TeacherSubjectRequest`
+                var request = Newtonsoft.Json.JsonConvert.DeserializeObject<TeacherSubjectRequest>(jsonData);
+
+                if (request == null || request.teacherId <= 0)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Invalid data");
+                }
+
+                var subject = await _adminProvider.AdminRepo.GetAssignedSubjectForTeacherAsync(request.teacherId);
+
+                if (subject != null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, new
+                    {
+                        subject.Id,
+                        subject.Name,
+                        subject.AcademicYear
+                    }, "Subject retrieved successfully");
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, "No subject assigned to the specified teacher");
+                }
+            }
+            catch (Exception ex)
+            {
+                return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, "An error occurred", ex.Message);
+            }
+        }
 
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using Models.DTOs.Request;
 using Models.DTOs.Response;
+using Models.models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,7 @@ namespace DataAccess.IRepo
         //  Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
         Task<List<TeacherResponse>> GetAllTeacherNames();
         Task<int> AssignSubjectToTeacher(AssignSubjectToTeacherRequest request);
+        Task<Subjects> GetAssignedSubjectForTeacherAsync(int teacherId);
         #endregion
     }
 }

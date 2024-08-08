@@ -921,6 +921,32 @@ namespace DataAccess.Repo
             }
         }
 
+        //public async Task<SubjectResponse> GetAssignedSubjectForTeacher(int teacherId)
+        //{
+
+        //    var teacher = await _context.teachers
+        //        .Include(t => t.Subject)
+        //        .FirstOrDefaultAsync(t => t.Id == teacherId);
+
+        //    if (teacher != null && teacher.Subject != null)
+        //    {
+        //        return new SubjectResponse
+        //        {
+        //            id = teacher.Subject.Id,
+        //            name = teacher.Subject.Name,
+        //            academicYear = teacher.Subject.AcademicYear
+        //        };
+        //    }
+
+        //    return null; 
+        //}
+        public async Task<Subjects> GetAssignedSubjectForTeacherAsync(int teacherId)
+        {
+            return await _context.teachers
+                .Where(t => t.Id == teacherId)
+                .Select(t => t.Subject)
+                .FirstOrDefaultAsync();
+        }
 
 
         #endregion
