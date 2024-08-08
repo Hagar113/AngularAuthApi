@@ -37,7 +37,9 @@ namespace DataAccess.IRepo
         Task<int> SaveUser(SaveUserRequest saveUserRequest);
         Task<List<UserResponse>> GetAllUsers();
         Task<bool> DeleteUser(UserReqById userRequest);
-        Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
+        //  Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
+        Task<List<TeacherResponse>> GetAllTeacherNames();
+        Task<int> AssignSubjectToTeacher(AssignSubjectToTeacherRequest request);
         #endregion
     }
 }

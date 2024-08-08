@@ -399,31 +399,31 @@ namespace DataAccess.Repo
             }
         }
 
-        public async Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request)
-        {
-            try
-            {
-                TeacherSubjects teacherSubject = new TeacherSubjects
-                {
-                    TeacherId = request.teacherId,
-                    SubjectId = request.subjectId,
-                    createdAt = DateTime.Now,
-                    createdBy = request.userId,
-                    isDeleted = false,
-                    isEnabled = true
-                };
+        //public async Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request)
+        //{
+        //    try
+        //    {
+        //        TeacherSubjects teacherSubject = new TeacherSubjects
+        //        {
+        //            TeacherId = request.teacherId,
+        //            SubjectId = request.subjectId,
+        //            createdAt = DateTime.Now,
+        //            createdBy = request.userId,
+        //            isDeleted = false,
+        //            isEnabled = true
+        //        };
 
-                _context.TeacherSubjects.Add(teacherSubject);
-                await _context.SaveChangesAsync();
+        //        _context.TeacherSubjects.Add(teacherSubject);
+        //        await _context.SaveChangesAsync();
 
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                // تسجيل الخطأ
-                return -1;
-            }
-        }
+        //        return 1;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // تسجيل الخطأ
+        //        return -1;
+        //    }
+        //}
 
 
         #endregion
@@ -859,6 +859,69 @@ namespace DataAccess.Repo
                 return false;
             }
         }
+
+        #endregion
+
+
+        #region teacher
+
+      
+        public async Task<List<TeacherResponse>> GetAllTeacherNames()
+        {
+            try
+            {
+                List<TeacherResponse> teacherResponses = new List<TeacherResponse>();
+
+             
+                var teachers = await _context.teachers.Where(t => !t.isDeleted ?? false).ToListAsync();
+
+                if (teachers != null)
+                {
+                    teacherResponses = teachers.Select(teacher => new TeacherResponse
+                    {
+                        id=teacher.Id,
+                        name = teacher.Name,
+                     
+                    }).ToList();
+                }
+                return teacherResponses;
+            }
+            catch
+            {
+             
+                return new List<TeacherResponse>();
+            }
+        }
+
+        public async Task<int> AssignSubjectToTeacher(AssignSubjectToTeacherRequest request)
+        {
+            try
+            {
+                var teacher = await _context.teachers.FindAsync(request.teacherId);
+                if (teacher == null)
+                {
+                    return -2; // Teacher not found
+                }
+
+                var subject = await _context.subjects.FindAsync(request.subjectId);
+                if (subject == null)
+                {
+                    return -2; // Subject not found
+                }
+
+                teacher.SubjectId = request.subjectId;
+                _context.Entry(teacher).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return 1; // Success
+            }
+            catch
+            {
+                return -1; // Error occurred
+            }
+        }
+
+
 
         #endregion
     }

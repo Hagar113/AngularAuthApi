@@ -283,46 +283,10 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("createdAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("createdBy")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("isDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("isEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("modifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("modifiedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("teachers");
-                });
-
-            modelBuilder.Entity("Models.models.TeacherSubjects", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
                     b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TeacherId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("createdAt")
@@ -347,9 +311,9 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.HasIndex("TeacherId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("TeacherSubjects");
+                    b.ToTable("teachers");
                 });
 
             modelBuilder.Entity("Models.models.Users", b =>
@@ -489,30 +453,19 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Models.models.Teacher", b =>
                 {
-                    b.HasOne("Models.models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Models.models.TeacherSubjects", b =>
-                {
                     b.HasOne("Models.models.Subjects", "Subject")
                         .WithMany()
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.models.Teacher", "Teacher")
-                        .WithMany("TeacherSubject")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Models.models.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Subject");
 
-                    b.Navigation("Teacher");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.models.Users", b =>
@@ -529,11 +482,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Models.models.Subjects", b =>
                 {
                     b.Navigation("ClassSchedules");
-                });
-
-            modelBuilder.Entity("Models.models.Teacher", b =>
-                {
-                    b.Navigation("TeacherSubject");
                 });
 #pragma warning restore 612, 618
         }

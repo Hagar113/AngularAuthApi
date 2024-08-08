@@ -16,6 +16,10 @@ namespace Models.models
         public int? UserId { get; set; }
         public Users? User { get; set; }
 
-        public List<TeacherSubjects> TeacherSubject { get; set; }
+        
+
+        [ForeignKey("Subject")]
+        public int SubjectId { get; set; }
+        public Subjects Subject { get; set; }
     }
 }

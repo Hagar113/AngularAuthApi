@@ -1,6 +1,7 @@
 ﻿using DataProvider.IProvider;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Models.DTOs.BaseRequest;
 using Models.DTOs.Request;
@@ -22,8 +23,8 @@ namespace AngularAuthApi.Controllers
         {
             _adminProvider = adminProvider;
             _localizer = localizer;
-           
-    }
+
+        }
 
         #region roles
         [HttpPost("GetRoleById")]
@@ -580,43 +581,103 @@ namespace AngularAuthApi.Controllers
                 return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
             }
         }
-        [HttpPost("SaveTeacherSubject")]
-        public async Task<IActionResult> SaveTeacherSubject([FromBody] SaveSubjectTeacherRequest request)
+        //[HttpPost("SaveTeacherSubject")]
+        //public async Task<IActionResult> SaveTeacherSubject([FromBody] SaveSubjectTeacherRequest request)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var result = await _adminProvider.AdminRepo.SaveTeacherSubjectAsync(request);
+        //        if (result == 1)
+        //        {
+        //            return Ok(new
+        //            {
+        //                Status = HttpStatusCode.OK,
+        //                Data = (object)null,
+        //                Message = "Data saved successfully"
+        //            });
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(new
+        //            {
+        //                Status = HttpStatusCode.BadRequest,
+        //                Data = (object)null,
+        //                Message = "Failed to save data"
+        //            });
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return BadRequest(new
+        //        {
+        //            Status = HttpStatusCode.BadRequest,
+        //            Data = (object)null,
+        //            Message = "Invalid request"
+        //        });
+        //    }
+        //}
+
+        [HttpPost("GetAllTeachers")]
+        public async Task<IActionResult> GetAllTeachers([FromBody] BaseRequestHeader baseRequestHeader)
         {
-            if (ModelState.IsValid)
+            try
             {
-                var result = await _adminProvider.AdminRepo.SaveTeacherSubjectAsync(request);
-                if (result == 1)
+                // Fetch all teacher names from the provider
+                var teachers = await _adminProvider.AdminRepo.GetAllTeacherNames();
+
+                // Create a success response
+                var response = GeneralResponse.Create(HttpStatusCode.OK, teachers, _localizer["TeachersRetrievedSuccessfully"]);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Optionally log the exception
+                var errorResponse = GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"], new { msg = _localizer["ErrorOccurred"], exception = ex.Message });
+                return BadRequest(errorResponse);
+            }
+
+
+
+        }
+        [HttpPost("SaveTeacherSubject")]
+        public async Task<GeneralResponse> SaveTeacherSubject([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                
+                var assignSubjectRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<AssignSubjectToTeacherRequest>(baseRequestHeader.data.ToString());
+
+                if (assignSubjectRequest == null)
                 {
-                    return Ok(new
-                    {
-                        Status = HttpStatusCode.OK,
-                        Data = (object)null,
-                        Message = "Data saved successfully"
-                    });
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
                 }
-                else
+
+                
+                var result = await _adminProvider.AdminRepo.AssignSubjectToTeacher(assignSubjectRequest);
+
+                switch (result)
                 {
-                    return BadRequest(new
-                    {
-                        Status = HttpStatusCode.BadRequest,
-                        Data = (object)null,
-                        Message = "Failed to save data"
-                    });
+                    case 1:
+                        return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["DataSavedSuccessfully"]);
+                    case -1:
+                        return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["FailedToSaveData"]);
+                    case -2:
+                        return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["TeacherOrSubjectNotFound"]);
+                    default:
+                        return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["UnexpectedError"]);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest(new
-                {
-                    Status = HttpStatusCode.BadRequest,
-                    Data = (object)null,
-                    Message = "Invalid request"
-                });
+                return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, _localizer["ErrorOccurred"], new { ErrorDetails = ex.Message });
             }
         }
 
+
+
+
         #endregion
+
 
     }
 }

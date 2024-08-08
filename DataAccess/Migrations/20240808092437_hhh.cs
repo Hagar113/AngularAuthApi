@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DataAccess.Migrations
 {
-    public partial class h : Migration
+    public partial class hhh : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -224,6 +224,7 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: true),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
                     createdAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     createdBy = table.Column<int>(type: "int", nullable: true),
                     modifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -235,42 +236,16 @@ namespace DataAccess.Migrations
                 {
                     table.PrimaryKey("PK_teachers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_teachers_users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TeacherSubjects",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TeacherId = table.Column<int>(type: "int", nullable: false),
-                    SubjectId = table.Column<int>(type: "int", nullable: false),
-                    createdAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    createdBy = table.Column<int>(type: "int", nullable: true),
-                    modifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    modifiedBy = table.Column<int>(type: "int", nullable: true),
-                    isDeleted = table.Column<bool>(type: "bit", nullable: true),
-                    isEnabled = table.Column<bool>(type: "bit", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TeacherSubjects", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TeacherSubjects_subjects_SubjectId",
+                        name: "FK_teachers_subjects_SubjectId",
                         column: x => x.SubjectId,
                         principalTable: "subjects",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeacherSubjects_teachers_TeacherId",
-                        column: x => x.TeacherId,
-                        principalTable: "teachers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_teachers_users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -304,19 +279,14 @@ namespace DataAccess.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_teachers_UserId",
+                name: "IX_teachers_SubjectId",
                 table: "teachers",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TeacherSubjects_SubjectId",
-                table: "TeacherSubjects",
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeacherSubjects_TeacherId",
-                table: "TeacherSubjects",
-                column: "TeacherId");
+                name: "IX_teachers_UserId",
+                table: "teachers",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_users_Email",
@@ -357,7 +327,7 @@ namespace DataAccess.Migrations
                 name: "students");
 
             migrationBuilder.DropTable(
-                name: "TeacherSubjects");
+                name: "teachers");
 
             migrationBuilder.DropTable(
                 name: "pages");
@@ -367,9 +337,6 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "subjects");
-
-            migrationBuilder.DropTable(
-                name: "teachers");
 
             migrationBuilder.DropTable(
                 name: "users");

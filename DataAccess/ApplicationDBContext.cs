@@ -68,9 +68,6 @@ namespace DataAccess
         public DbSet<Teacher> teachers { get; set; }
         public DbSet<Student> students { get; set; }
         public DbSet<Subjects> subjects { get; set; }
-       
-        
-        public DbSet<TeacherSubjects> TeacherSubjects { get; set; }
         public DbSet<Roles> roles { get; set; }
         public DbSet<RolePage> rolepage { get; set; }
         public DbSet<Pages> pages { get; set; }
