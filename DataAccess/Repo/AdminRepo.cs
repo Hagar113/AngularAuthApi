@@ -600,15 +600,15 @@ namespace DataAccess.Repo
                     UserResponse res = new UserResponse
                     {
                         id = user.Id,
-                        username = user.Username,
-                        name = user.Name,
+                        userName = user.Username,
+                        firstName = user.Name,
                         email = user.Email,
                         phone = user.phone,
                         age = user.Age,
-                        schoolYear = user.schoolYear,
-                        token = user.Token, // Assuming the token is stored in the User entity
+                        academicYear = user.schoolYear,
+                       
                         dateOfBirth = user.DateOfBirth,
-                        roleId = user.roleId,
+                        roleId = user.Id,
                     };
                     return res;
                 }
@@ -633,7 +633,7 @@ namespace DataAccess.Repo
             {
                 // Step 1: Check if user exists (Add or Update)
                 Users user;
-                if (saveUserRequest.userId == null || saveUserRequest.userId <= 0)
+                if (saveUserRequest.id == null || saveUserRequest.id <= 0)
                 {
                     // Add new user
                     user = await AddNewUser(saveUserRequest);
@@ -718,7 +718,7 @@ namespace DataAccess.Repo
         {
             try
             {
-                var user = await _context.users.FirstOrDefaultAsync(u => u.Id == saveUserRequest.userId);
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Id == saveUserRequest.id);
                 if (user == null)
                 {
                     return null; // Indicates user not found
@@ -793,6 +793,7 @@ namespace DataAccess.Repo
         }
 
 
+
         //get
         public async Task<List<UserResponse>> GetAllUsers()
         {
@@ -810,15 +811,15 @@ namespace DataAccess.Repo
                         userResponses.Add(new UserResponse
                         {
                             id = user.Id,
-                            username = user.Username,
-                            name = user.Name,
+                            userName = user.Username,
+                           firstName = user.Name,
                             email = user.Email,
                             phone = user.phone,
                             age = user.Age,
-                            schoolYear = user.schoolYear,
-                            token = user.Token, // Assuming the token is stored in the User entity
+                            academicYear = user.schoolYear,
+                         
                             dateOfBirth = user.DateOfBirth,
-                            roleId = user.roleId
+                            roleId = user.Id
                         });
                     }
                 }
@@ -832,40 +833,96 @@ namespace DataAccess.Repo
                 return new List<UserResponse>();
             }
         }
+        //public async Task<bool> DeleteUser(UserReqById userRequest)
+        //{
+        //    try
+        //    {
+
+        //        var user = await _context.users.FindAsync(userRequest.userId);
+
+        //        if (user != null)
+        //        {
+
+        //            user.isDeleted = true;
+        //            _context.users.Update(user);
+        //            await _context.SaveChangesAsync();
+        //            return true;
+        //        }
+        //        else
+        //        {
+
+        //            return false;
+        //        }
+        //    }
+        //    catch
+        //    {
+
+        //        return false;
+        //    }
+        //}
+
         public async Task<bool> DeleteUser(UserReqById userRequest)
         {
             try
             {
-                
                 var user = await _context.users.FindAsync(userRequest.userId);
 
                 if (user != null)
                 {
-                   
+                    // تحديث حالة المستخدم إلى محذوف
                     user.isDeleted = true;
                     _context.users.Update(user);
+
+                    // الحصول على الدور الخاص بالمستخدم
+                    var role = await _context.roles.FindAsync(user.roleId);
+                    if (role != null)
+                    {
+                        switch (role.code)
+                        {
+                            case "TEACHER":
+                                // تحديث حالة المستخدم في جدول المعلمين
+                                var teacher = await _context.teachers.FirstOrDefaultAsync(t => t.UserId == user.Id);
+                                if (teacher != null)
+                                {
+                                    teacher.isDeleted = true;
+                                    _context.teachers.Update(teacher);
+                                }
+                                break;
+
+                            case "STUDENT":
+                                // تحديث حالة المستخدم في جدول الطلاب
+                                var student = await _context.students.FirstOrDefaultAsync(s => s.UserId == user.Id);
+                                if (student != null)
+                                {
+                                    student.isDeleted = true;
+                                    _context.students.Update(student);
+                                }
+                                break;
+                        }
+                    }
+
+                    // حفظ التغييرات في جميع الجداول
                     await _context.SaveChangesAsync();
                     return true;
                 }
                 else
                 {
-                  
-                    return false;
+                    return false; // المستخدم غير موجود
                 }
             }
             catch
             {
-               
-                return false;
+                return false; // خطأ في التنفيذ
             }
         }
+
 
         #endregion
 
 
         #region teacher
 
-      
+
         public async Task<List<TeacherResponse>> GetAllTeacherNames()
         {
             try
@@ -948,6 +1005,13 @@ namespace DataAccess.Repo
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<List<Pages>> GetPagesForRoleAsync(int roleId)
+        {
+            return await _context.rolepage
+                .Where(rp => rp.RoleId == roleId)
+                .Select(rp => rp.pages)
+                .ToListAsync();
+        }
 
         #endregion
     }

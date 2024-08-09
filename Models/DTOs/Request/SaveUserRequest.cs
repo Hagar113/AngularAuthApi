@@ -8,7 +8,7 @@ namespace Models.DTOs.Request
 {
     public class SaveUserRequest
     {
-        public int? userId { get; set; } 
+        public int? id { get; set; } 
 
         public string userName { get; set; } 
 

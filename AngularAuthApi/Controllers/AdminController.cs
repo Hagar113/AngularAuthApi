@@ -500,8 +500,6 @@ namespace AngularAuthApi.Controllers
             }
         }
 
-
-
         [HttpPost("SaveUser")]
         public async Task<GeneralResponse> SaveUser([FromBody] BaseRequestHeader baseRequestHeader)
         {
@@ -538,6 +536,44 @@ namespace AngularAuthApi.Controllers
                 return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
             }
         }
+
+
+        //[HttpPost("SaveUser")]
+        //public async Task<GeneralResponse> SaveUser([FromBody] BaseRequestHeader baseRequestHeader)
+        //{
+        //    try
+        //    {
+        //        var saveUserRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveUserRequest>(baseRequestHeader.data.ToString());
+
+        //        if (saveUserRequest == null)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
+        //        }
+
+        //        var status = await _adminProvider.AdminRepo.SaveUser(saveUserRequest);
+
+        //        if (status == 1)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["UserSavedSuccessfully"]);
+        //        }
+        //        else if (status == -1)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+        //        }
+        //        else if (status == -2)
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["UserNotFound"]);
+        //        }
+        //        else
+        //        {
+        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
+        //    }
+        //}
         [HttpPost("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers([FromBody] BaseRequestHeader baseRequestHeader)
         {
@@ -747,8 +783,57 @@ namespace AngularAuthApi.Controllers
         }
 
 
-        #endregion
+        [HttpPost("GetAssignedPages")]
+        public async Task<GeneralResponse> GetAssignedPages([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+                // تحقق من أن البيانات موجودة وأنها من نوع `string`
+                if (baseRequestHeader == null || baseRequestHeader.data == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Invalid request data");
+                }
 
+                // تحويل `baseRequestHeader.Data` إلى `string` إذا كان من نوع `object`
+                var jsonData = baseRequestHeader.data.ToString();
+                if (jsonData == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Data conversion error");
+                }
 
+                // ديسرياليز البيانات إلى `RoleRequest`
+                var request = Newtonsoft.Json.JsonConvert.DeserializeObject<RoleRequest>(jsonData);
+
+                if (request == null || request.RoleId <= 0)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Invalid data");
+                }
+
+                var pages = await _adminProvider.AdminRepo.GetPagesForRoleAsync(request.RoleId);
+
+                if (pages.Any())
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, pages.Select(p => new
+                    {
+                        p.id,
+                        p.name,
+                        p.path
+                    }).ToList(), "Pages retrieved successfully");
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, "No pages assigned to the specified role");
+                }
+            }
+            catch (Exception ex)
+            {
+                return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, "An error occurred", ex.Message);
+            }
+        }
     }
+
+    #endregion
+
+
+
 }

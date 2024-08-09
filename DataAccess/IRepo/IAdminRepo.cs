@@ -41,6 +41,7 @@ namespace DataAccess.IRepo
         //  Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request);
         Task<List<TeacherResponse>> GetAllTeacherNames();
         Task<int> AssignSubjectToTeacher(AssignSubjectToTeacherRequest request);
+        Task<List<Pages>> GetPagesForRoleAsync(int roleId);
         Task<Subjects> GetAssignedSubjectForTeacherAsync(int teacherId);
         #endregion
     }
