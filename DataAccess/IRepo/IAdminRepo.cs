@@ -43,6 +43,7 @@ namespace DataAccess.IRepo
         Task<int> AssignSubjectToTeacher(AssignSubjectToTeacherRequest request);
         Task<List<Pages>> GetPagesForRoleAsync(int roleId);
         Task<Subjects> GetAssignedSubjectForTeacherAsync(int teacherId);
+        Task<Roles> GetRoleForUserAsync(int userId);
         #endregion
     }
 }

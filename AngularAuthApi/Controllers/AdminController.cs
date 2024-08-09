@@ -1,4 +1,5 @@
 ﻿using DataProvider.IProvider;
+using DataProvider.Provider;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -538,42 +539,7 @@ namespace AngularAuthApi.Controllers
         }
 
 
-        //[HttpPost("SaveUser")]
-        //public async Task<GeneralResponse> SaveUser([FromBody] BaseRequestHeader baseRequestHeader)
-        //{
-        //    try
-        //    {
-        //        var saveUserRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveUserRequest>(baseRequestHeader.data.ToString());
-
-        //        if (saveUserRequest == null)
-        //        {
-        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["InvalidData"]);
-        //        }
-
-        //        var status = await _adminProvider.AdminRepo.SaveUser(saveUserRequest);
-
-        //        if (status == 1)
-        //        {
-        //            return GeneralResponse.Create(HttpStatusCode.OK, null, _localizer["UserSavedSuccessfully"]);
-        //        }
-        //        else if (status == -1)
-        //        {
-        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
-        //        }
-        //        else if (status == -2)
-        //        {
-        //            return GeneralResponse.Create(HttpStatusCode.NotFound, null, _localizer["UserNotFound"]);
-        //        }
-        //        else
-        //        {
-        //            return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["UnexpectedError"]);
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        return GeneralResponse.Create(HttpStatusCode.BadRequest, null, _localizer["ErrorOccurred"]);
-        //    }
-        //}
+       
         [HttpPost("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers([FromBody] BaseRequestHeader baseRequestHeader)
         {
@@ -830,7 +796,61 @@ namespace AngularAuthApi.Controllers
                 return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, "An error occurred", ex.Message);
             }
         }
+
+
+
+        [HttpPost("GetAssignedRole")]
+        public async Task<GeneralResponse> GetAssignedRole([FromBody] BaseRequestHeader baseRequestHeader)
+        {
+            try
+            {
+               
+                if (baseRequestHeader == null || baseRequestHeader.data == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Invalid request data");
+                }
+
+               
+                var jsonData = baseRequestHeader.data.ToString();
+                if (jsonData == null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Data conversion error");
+                }
+
+               
+                var request = Newtonsoft.Json.JsonConvert.DeserializeObject<UserReqById>(jsonData);
+
+                if (request == null || request.userId <= 0)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.BadRequest, null, "Invalid data");
+                }
+
+                var role = await _adminProvider.AdminRepo.GetRoleForUserAsync(request.userId);
+
+                if (role != null)
+                {
+                    return GeneralResponse.Create(HttpStatusCode.OK, new
+                    {
+                        role.id,
+                        role.code,
+                        role.Name,
+                     
+                    }, "Subject retrieved successfully");
+                }
+                else
+                {
+                    return GeneralResponse.Create(HttpStatusCode.NotFound, null, "No subject assigned to the specified teacher");
+                }
+            }
+            catch (Exception ex)
+            {
+                return GeneralResponse.Create(HttpStatusCode.InternalServerError, null, "An error occurred", ex.Message);
+            }
+        }
     }
+
+
+   
 
     #endregion
 

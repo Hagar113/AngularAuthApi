@@ -399,31 +399,6 @@ namespace DataAccess.Repo
             }
         }
 
-        //public async Task<int> SaveTeacherSubjectAsync(SaveSubjectTeacherRequest request)
-        //{
-        //    try
-        //    {
-        //        TeacherSubjects teacherSubject = new TeacherSubjects
-        //        {
-        //            TeacherId = request.teacherId,
-        //            SubjectId = request.subjectId,
-        //            createdAt = DateTime.Now,
-        //            createdBy = request.userId,
-        //            isDeleted = false,
-        //            isEnabled = true
-        //        };
-
-        //        _context.TeacherSubjects.Add(teacherSubject);
-        //        await _context.SaveChangesAsync();
-
-        //        return 1;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // تسجيل الخطأ
-        //        return -1;
-        //    }
-        //}
 
 
         #endregion
@@ -597,6 +572,12 @@ namespace DataAccess.Repo
 
                 if (user != null)
                 {
+                    // Get the role code based on roleId
+                    var roleCode = await _context.roles
+                        .Where(r => r.id == user.roleId)
+                        .Select(r => r.code) // Assume `Code` is the role code property
+                        .FirstOrDefaultAsync();
+
                     UserResponse res = new UserResponse
                     {
                         id = user.Id,
@@ -606,10 +587,10 @@ namespace DataAccess.Repo
                         phone = user.phone,
                         age = user.Age,
                         academicYear = user.schoolYear,
-                       
                         dateOfBirth = user.DateOfBirth,
-                        roleId = user.Id,
+                        roleCode = roleCode, // Return role code instead of role ID
                     };
+
                     return res;
                 }
                 else
@@ -624,6 +605,7 @@ namespace DataAccess.Repo
                 return null;
             }
         }
+
 
         //save
 
@@ -802,24 +784,29 @@ namespace DataAccess.Repo
                 List<UserResponse> userResponses = new List<UserResponse>();
 
                 // Get all users where IsDeleted is false
-                var users = await _context.users.Where(u => !u.isDeleted ?? false).ToListAsync();
+                var users = await _context.users.Where(u => !(u.isDeleted ?? false)).ToListAsync();
 
                 if (users != null)
                 {
                     foreach (var user in users)
                     {
+                        // Get the role code based on roleId
+                        var roleCode = await _context.roles
+                            .Where(r => r.id == user.roleId)
+                            .Select(r => r.code) // Assume `Code` is the role code property
+                            .FirstOrDefaultAsync();
+
                         userResponses.Add(new UserResponse
                         {
                             id = user.Id,
                             userName = user.Username,
-                           firstName = user.Name,
+                            firstName = user.Name,
                             email = user.Email,
                             phone = user.phone,
                             age = user.Age,
                             academicYear = user.schoolYear,
-                         
                             dateOfBirth = user.DateOfBirth,
-                            roleId = user.Id
+                            roleCode = roleCode// Return role code instead of role ID
                         });
                     }
                 }
@@ -833,33 +820,6 @@ namespace DataAccess.Repo
                 return new List<UserResponse>();
             }
         }
-        //public async Task<bool> DeleteUser(UserReqById userRequest)
-        //{
-        //    try
-        //    {
-
-        //        var user = await _context.users.FindAsync(userRequest.userId);
-
-        //        if (user != null)
-        //        {
-
-        //            user.isDeleted = true;
-        //            _context.users.Update(user);
-        //            await _context.SaveChangesAsync();
-        //            return true;
-        //        }
-        //        else
-        //        {
-
-        //            return false;
-        //        }
-        //    }
-        //    catch
-        //    {
-
-        //        return false;
-        //    }
-        //}
 
         public async Task<bool> DeleteUser(UserReqById userRequest)
         {
@@ -978,25 +938,7 @@ namespace DataAccess.Repo
             }
         }
 
-        //public async Task<SubjectResponse> GetAssignedSubjectForTeacher(int teacherId)
-        //{
-
-        //    var teacher = await _context.teachers
-        //        .Include(t => t.Subject)
-        //        .FirstOrDefaultAsync(t => t.Id == teacherId);
-
-        //    if (teacher != null && teacher.Subject != null)
-        //    {
-        //        return new SubjectResponse
-        //        {
-        //            id = teacher.Subject.Id,
-        //            name = teacher.Subject.Name,
-        //            academicYear = teacher.Subject.AcademicYear
-        //        };
-        //    }
-
-        //    return null; 
-        //}
+       
         public async Task<Subjects> GetAssignedSubjectForTeacherAsync(int teacherId)
         {
             return await _context.teachers
@@ -1012,6 +954,15 @@ namespace DataAccess.Repo
                 .Select(rp => rp.pages)
                 .ToListAsync();
         }
+
+        public async Task<Roles> GetRoleForUserAsync(int userId)
+        {
+            return await _context.users
+                .Where(rp => rp.Id == userId)
+                .Select(rp => rp.Role)
+                .FirstOrDefaultAsync(); 
+        }
+
 
         #endregion
     }
