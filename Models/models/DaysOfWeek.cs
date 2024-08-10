@@ -13,6 +13,11 @@ namespace Models.models
         public int DayId { get; set; }
         public string DayName { get; set; }
 
-     //   public List<ClassSchedule> ClassSchedules { get; set; }
+        // public int TotalHours { get; set; }
+
+        //   public List<ClassSchedule> ClassSchedules { get; set; }
+        public int TotalHours { get; set; }
+
+        public List<Timetable> Timetables { get; set; }
     }
 }

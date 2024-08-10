@@ -17,9 +17,7 @@ namespace Models.models
         [ForeignKey("User")]
         public int? UserId { get; set; }
         public Users? User { get; set; }
-        // public List<StudentSubjects> StudentSubjects { get; set; }
-        //public List<StudentClass> StudentClasses { get; set; }
-
+       
         [ForeignKey("GetClass")]
         public int? classId { get; set; }
         public Class ? GetClass { get; set; }

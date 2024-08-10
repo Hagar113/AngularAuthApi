@@ -13,7 +13,7 @@ namespace Models.models
 
         public int AcademicYear { get; set; }
 
-        public List<ClassSchedule> ClassSchedules { get; set; }
+       
 
     }
 }

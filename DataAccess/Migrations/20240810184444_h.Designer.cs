@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240810084518_jj")]
-    partial class jj
+    [Migration("20240810184444_h")]
+    partial class h
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,16 +52,10 @@ namespace DataAccess.Migrations
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DayId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Hour")
-                        .HasColumnType("int");
-
                     b.Property<int?>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimetableId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -69,6 +63,8 @@ namespace DataAccess.Migrations
                     b.HasIndex("ClassId");
 
                     b.HasIndex("SubjectId");
+
+                    b.HasIndex("TimetableId");
 
                     b.ToTable("ClassSchedules");
                 });
@@ -318,6 +314,33 @@ namespace DataAccess.Migrations
                     b.ToTable("teachers");
                 });
 
+            modelBuilder.Entity("Models.models.Timetable", b =>
+                {
+                    b.Property<int>("TimetableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TimetableId"), 1L, 1);
+
+                    b.Property<int>("DayId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("TimetableId");
+
+                    b.HasIndex("DayId");
+
+                    b.ToTable("Timetable");
+                });
+
             modelBuilder.Entity("Models.models.Users", b =>
                 {
                     b.Property<int>("Id")
@@ -412,9 +435,17 @@ namespace DataAccess.Migrations
                         .WithMany("ClassSchedules")
                         .HasForeignKey("SubjectId");
 
+                    b.HasOne("Models.models.Timetable", "Timetable")
+                        .WithMany()
+                        .HasForeignKey("TimetableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Class");
 
                     b.Navigation("Subject");
+
+                    b.Navigation("Timetable");
                 });
 
             modelBuilder.Entity("Models.models.RolePage", b =>
@@ -443,7 +474,7 @@ namespace DataAccess.Migrations
                         .HasForeignKey("UserId");
 
                     b.HasOne("Models.models.Class", "GetClass")
-                        .WithMany()
+                        .WithMany("students")
                         .HasForeignKey("classId");
 
                     b.Navigation("GetClass");
@@ -466,6 +497,17 @@ namespace DataAccess.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Models.models.Timetable", b =>
+                {
+                    b.HasOne("Models.models.DaysOfWeek", "DayOfWeek")
+                        .WithMany()
+                        .HasForeignKey("DayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DayOfWeek");
+                });
+
             modelBuilder.Entity("Models.models.Users", b =>
                 {
                     b.HasOne("Models.models.Roles", "Role")
@@ -475,6 +517,11 @@ namespace DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Models.models.Class", b =>
+                {
+                    b.Navigation("students");
                 });
 
             modelBuilder.Entity("Models.models.Subjects", b =>

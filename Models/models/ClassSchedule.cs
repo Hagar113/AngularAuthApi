@@ -17,14 +17,8 @@ namespace Models.models
         public int ClassId { get; set; }
         public Class Class { get; set; }
 
-        [ForeignKey("DayOfWeek")]
-        public int DayId { get; set; }
-        public DayOfWeek DayOfWeek { get; set; }
-
-        [ForeignKey("Subject")]
-        public int? SubjectId { get; set; }
-        public Subjects? Subject { get; set; }
-
-        public int Hour { get; set; }
+        [ForeignKey("Timetable")]
+        public int TimetableId { get; set; }
+        public Timetable Timetable { get; set; } 
     }
 }
