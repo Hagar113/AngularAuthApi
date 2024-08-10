@@ -123,45 +123,8 @@ namespace AngularAuthApi.Controllers
                 errors.Add(_localizer["InvalidAcademicYear"]);
             }
 
-            if (request.dateOfBirth != default)
-            {
-                var dateOfBirth = request.dateOfBirth;
-                var calculatedAge = DateTime.Today.Year - dateOfBirth.Year;
-                if (dateOfBirth > DateTime.Today.AddYears(-calculatedAge))
-                {
-                    calculatedAge--;
-                }
-
-                // Check if calculated age matches the age provided
-                if (request.age != calculatedAge)
-                {
-                    errors.Add(_localizer["AgeMismatch"]);
-                }
-
-                // Role-based age validation
-                if (request.RoleId == 1)
-                {
-                    if (calculatedAge < 14 || calculatedAge > 25)
-                    {
-                        errors.Add(_localizer["InvalidStudentAge"]);
-                    }
-                }
-                else if (request.RoleId == 2)
-                {
-                    if (calculatedAge < 25 || calculatedAge > 60)
-                    {
-                        errors.Add(_localizer["InvalidAdminAge"]);
-                    }
-                }
-                else if (request.RoleId == 3)
-                {
-                    if (calculatedAge < 25 || calculatedAge > 60)
-                    {
-                        errors.Add(_localizer["InvalidTeacherAge"]); // Use the same error message as for RoleId 2 or create a new one if needed
-                    }
-                }
-            }
-
+            // Removed age validation
+            // Removed role-based age validation
 
             return errors;
         }
