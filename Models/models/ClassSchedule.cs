@@ -22,8 +22,8 @@ namespace Models.models
         public DayOfWeek DayOfWeek { get; set; }
 
         [ForeignKey("Subject")]
-        public int SubjectId { get; set; }
-        public Subjects Subject { get; set; }
+        public int? SubjectId { get; set; }
+        public Subjects? Subject { get; set; }
 
         public int Hour { get; set; }
     }

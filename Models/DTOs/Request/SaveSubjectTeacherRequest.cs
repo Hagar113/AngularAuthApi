@@ -10,7 +10,7 @@ namespace Models.DTOs.Request
     {
         public int id { get; set; }
         public int teacherId { get; set; }
-        public int subjectId { get; set; }
+        public int? subjectId { get; set; }
     }
 
     public class baseReq

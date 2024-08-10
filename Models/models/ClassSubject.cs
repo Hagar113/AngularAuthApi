@@ -18,7 +18,7 @@ namespace Models.models
         public Class Class { get; set; }
 
         [ForeignKey("Subjects")]
-        public int SubjectId { get; set; }
-        public Subjects Subjects { get; set; }
+        public int? SubjectId { get; set; }
+        public Subjects? Subjects { get; set; }
     }
 }
