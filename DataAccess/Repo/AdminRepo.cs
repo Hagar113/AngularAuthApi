@@ -586,9 +586,10 @@ namespace DataAccess.Repo
                         email = user.Email,
                         phone = user.phone,
                         age = user.Age,
+                        password = user.Password,
                         academicYear = user.schoolYear,
                         dateOfBirth = user.DateOfBirth,
-                        roleCode = roleCode, // Return role code instead of role ID
+                        roleId = roleCode
                     };
 
                     return res;
@@ -806,7 +807,7 @@ namespace DataAccess.Repo
                             age = user.Age,
                             academicYear = user.schoolYear,
                             dateOfBirth = user.DateOfBirth,
-                            roleCode = roleCode// Return role code instead of role ID
+                            roleId = roleCode// Return role code instead of role ID
                         });
                     }
                 }
