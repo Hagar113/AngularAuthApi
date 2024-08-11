@@ -562,22 +562,30 @@ namespace DataAccess.Repo
 
         #region user
         //getbyid
-        public async Task<UserResponse?> GetUserById(UserReqById UserRequest)
+        public async Task<UserResponse?> GetUserById(UserReqById userRequest)
         {
             try
             {
+                // إنشاء كائن من فئة Encryption
+                var encryption = new Encryption();
+
+                // جلب المستخدم من قاعدة البيانات
                 var user = await _context.users
-                    .Where(s => s.Id == UserRequest.userId && (s.isDeleted == false || s.isDeleted == null))
+                    .Where(s => s.Id == userRequest.userId && (s.isDeleted == false || s.isDeleted == null))
                     .FirstOrDefaultAsync();
 
                 if (user != null)
                 {
-                    // Get the role code based on roleId
+                    // فك تشفير كلمة المرور
+                    var decryptedPassword = encryption.Decrypt(user.Password);
+
+                    // جلب رمز الدور بناءً على roleId
                     var roleCode = await _context.roles
                         .Where(r => r.id == user.roleId)
-                        .Select(r => r.code) // Assume `Code` is the role code property
+                        .Select(r => r.code) // افترض أن `code` هو الخاصية الخاصة بدور المستخدم
                         .FirstOrDefaultAsync();
 
+                    // إنشاء استجابة المستخدم
                     UserResponse res = new UserResponse
                     {
                         id = user.Id,
@@ -586,7 +594,7 @@ namespace DataAccess.Repo
                         email = user.Email,
                         phone = user.phone,
                         age = user.Age,
-                        password = user.Password,
+                        password = decryptedPassword, // استخدام كلمة المرور المفككة هنا
                         academicYear = user.schoolYear,
                         dateOfBirth = user.DateOfBirth,
                         roleId = roleCode
@@ -601,12 +609,11 @@ namespace DataAccess.Repo
             }
             catch (Exception ex)
             {
-                // Optionally log the error
+                // تسجيل الأخطاء إذا لزم الأمر
                 Console.WriteLine("Error in GetUserById: " + ex.Message);
                 return null;
             }
         }
-
 
         //save
 
@@ -807,6 +814,7 @@ namespace DataAccess.Repo
                             age = user.Age,
                             academicYear = user.schoolYear,
                             dateOfBirth = user.DateOfBirth,
+                            password = user.Password,
                             roleId = roleCode// Return role code instead of role ID
                         });
                     }

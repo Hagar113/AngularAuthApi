@@ -1,69 +1,70 @@
 ﻿using Infrastructure.helpers.IHelper;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.helpers.Helper
 {
     public class Encryption : IEncryption
     {
         private byte[] key = { };
-
         private byte[] IV = {
-        0x12,
-        0x34,
-        0x56,
-        0x78,
-        0x90,
-        0xab,
-        0xcd,
-        0xef};
+            0x12, 0x34, 0x56, 0x78,
+            0x90, 0xab, 0xcd, 0xef
+        };
 
         private string EncryptionKey = "GalaxySmartSolutions@123456";
 
-        public string Decrypt(string Input)
+        public string Decrypt(string input)
         {
-            byte[] inputByteArray = new byte[Input.Length];
+            byte[] inputByteArray = Convert.FromBase64String(input);
             try
             {
                 key = Encoding.UTF8.GetBytes(EncryptionKey.Substring(0, 8));
-                DESCryptoServiceProvider des = new DESCryptoServiceProvider();
-                inputByteArray = Convert.FromBase64String(Input);
-                MemoryStream ms = new MemoryStream();
-                CryptoStream cs = new CryptoStream(ms, des.CreateDecryptor(key, IV), CryptoStreamMode.Write);
-                cs.Write(inputByteArray, 0, inputByteArray.Length);
-                cs.FlushFinalBlock();
-
-                Encoding encoding__1 = Encoding.UTF8;
-
-                return encoding__1.GetString(ms.ToArray());
+                using (var des = new DESCryptoServiceProvider())
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        using (var cs = new CryptoStream(ms, des.CreateDecryptor(key, IV), CryptoStreamMode.Write))
+                        {
+                            cs.Write(inputByteArray, 0, inputByteArray.Length);
+                            cs.FlushFinalBlock();
+                        }
+                        return Encoding.UTF8.GetString(ms.ToArray());
+                    }
+                }
             }
             catch (Exception ex)
             {
-                return "error : " + ex.Message;
+                // Handle exceptions accordingly
+                return $"Error: {ex.Message}";
             }
-
         }
 
-        public string Encrypt(string Input)
+        public string Encrypt(string input)
         {
             try
             {
                 key = Encoding.UTF8.GetBytes(EncryptionKey.Substring(0, 8));
-                DESCryptoServiceProvider des = new DESCryptoServiceProvider();
-                byte[] inputByteArray = Encoding.UTF8.GetBytes(Input);
-                MemoryStream ms = new MemoryStream();
-                CryptoStream cs = new CryptoStream(ms, des.CreateEncryptor(key, IV), CryptoStreamMode.Write);
-                cs.Write(inputByteArray, 0, inputByteArray.Length);
-                cs.FlushFinalBlock();
-                return Convert.ToBase64String(ms.ToArray());
+                using (var des = new DESCryptoServiceProvider())
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        using (var cs = new CryptoStream(ms, des.CreateEncryptor(key, IV), CryptoStreamMode.Write))
+                        {
+                            byte[] inputByteArray = Encoding.UTF8.GetBytes(input);
+                            cs.Write(inputByteArray, 0, inputByteArray.Length);
+                            cs.FlushFinalBlock();
+                        }
+                        return Convert.ToBase64String(ms.ToArray());
+                    }
+                }
             }
             catch (Exception ex)
             {
-                return "error : " + ex.Message;
+                // Handle exceptions accordingly
+                return $"Error: {ex.Message}";
             }
         }
     }
