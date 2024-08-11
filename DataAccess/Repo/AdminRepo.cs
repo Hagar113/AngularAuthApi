@@ -571,6 +571,7 @@ namespace DataAccess.Repo
 
                 // جلب المستخدم من قاعدة البيانات
                 var user = await _context.users
+                     .Include(a => a.Role)
                     .Where(s => s.Id == userRequest.userId && (s.isDeleted == false || s.isDeleted == null))
                     .FirstOrDefaultAsync();
 
@@ -580,11 +581,7 @@ namespace DataAccess.Repo
                     var decryptedPassword = encryption.Decrypt(user.Password);
 
                     // جلب رمز الدور بناءً على roleId
-                    var roleCode = await _context.roles
-                        .Where(r => r.id == user.roleId)
-                        .Select(r => r.code) // افترض أن `code` هو الخاصية الخاصة بدور المستخدم
-                        .FirstOrDefaultAsync();
-
+                  
                     // إنشاء استجابة المستخدم
                     UserResponse res = new UserResponse
                     {
@@ -597,7 +594,7 @@ namespace DataAccess.Repo
                         password = decryptedPassword, // استخدام كلمة المرور المفككة هنا
                         academicYear = user.schoolYear,
                         dateOfBirth = user.DateOfBirth,
-                        roleId = roleCode
+                        roleCode = user.Role.Name,
                     };
 
                     return res;
@@ -792,17 +789,19 @@ namespace DataAccess.Repo
                 List<UserResponse> userResponses = new List<UserResponse>();
 
                 // Get all users where IsDeleted is false
-                var users = await _context.users.Where(u => !(u.isDeleted ?? false)).ToListAsync();
+                var users = await _context.users
+                    .Include(a =>a.Role)
+                   . Where(u => !(u.isDeleted ?? false)).ToListAsync();
 
                 if (users != null)
                 {
                     foreach (var user in users)
                     {
                         // Get the role code based on roleId
-                        var roleCode = await _context.roles
-                            .Where(r => r.id == user.roleId)
-                            .Select(r => r.code) // Assume `Code` is the role code property
-                            .FirstOrDefaultAsync();
+                        //var roleCode = await _context.roles
+                        //    .Where(r => r.id == user.roleId)
+                        //    .Select(r => r.code) // Assume `Code` is the role code property
+                        //    .FirstOrDefaultAsync();
 
                         userResponses.Add(new UserResponse
                         {
@@ -815,7 +814,7 @@ namespace DataAccess.Repo
                             academicYear = user.schoolYear,
                             dateOfBirth = user.DateOfBirth,
                             password = user.Password,
-                            roleId = roleCode// Return role code instead of role ID
+                            roleCode = user.Role.Name// Return role code instead of role ID
                         });
                     }
                 }
