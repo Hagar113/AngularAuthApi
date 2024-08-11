@@ -594,7 +594,8 @@ namespace DataAccess.Repo
                         password = decryptedPassword, // استخدام كلمة المرور المفككة هنا
                         academicYear = user.schoolYear,
                         dateOfBirth = user.DateOfBirth,
-                        roleCode = user.Role.Name,
+                        //roleCode = user.Role.Name,
+                        roleId = user.Role.id
                     };
 
                     return res;
@@ -814,7 +815,8 @@ namespace DataAccess.Repo
                             academicYear = user.schoolYear,
                             dateOfBirth = user.DateOfBirth,
                             password = user.Password,
-                            roleCode = user.Role.Name// Return role code instead of role ID
+                           roleCode = user.Role.Name,// Return role code instead of role ID
+                           
                         });
                     }
                 }

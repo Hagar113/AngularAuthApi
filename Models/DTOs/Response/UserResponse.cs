@@ -27,5 +27,7 @@ namespace Models.DTOs.Response
         public DateTime dateOfBirth { get; set; }
 
         public string roleCode { get; set; }
+
+        public int roleId { get; set; }
     }
 }
